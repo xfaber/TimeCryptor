@@ -489,6 +489,17 @@ namespace TimeCryptor
     }
 
     /// <summary>
+    /// Restituisce la pappresentazione compressa del punto in formato esadecimale
+    /// </summary>
+    /// <param name="ecPoint"></param>
+    /// <returns></returns>
+    public static string ToCompressedPoint(this Org.BouncyCastle.Math.EC.ECPoint ecPoint)
+    {
+      byte[] compressedPoint = ecPoint.GetEncoded(true);
+      return BitConverter.ToString(compressedPoint).Replace("-", string.Empty);
+    }
+
+    /// <summary>
     /// Converte Org.BouncyCastle.Math.BigInteger in System.Numerics.BigInteger
     /// </summary>
     /// <param name="n"></param>
