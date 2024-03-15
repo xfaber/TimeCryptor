@@ -392,83 +392,6 @@ namespace TimeCryptor
 
     }
 
-    public void SetPublicParams_old(int round, G2 PKLOE)
-    {
-      Console.WriteLine($"\n=== Parametri della Parte P ===");
-      //PK = g^ski
-      //Genera la coppia di chiavi per la curva di interesse (es. SECP256K1)
-      /*
-       var keygenParams = new ECKeyGenerationParameters(ecParams, new SecureRandom());
-       var  generator = new Org.BouncyCastle.Crypto.Generators.ECKeyPairGenerator();
-       generator.Init(keygenParams);
-       var keyPair = generator.GenerateKeyPair();
-       var sk = (ECPrivateKeyParameters)keyPair.Private;
-       var PK = (ECPublicKeyParameters)keyPair.Public;   //PKi=g^ski
-       Console.WriteLine($"sk: {sk.D.ToString(16)} (chiave segreta originale)");
-       //Console.WriteLine($"PK(tlcs): {PK.Q}");
-       this.sk = sk.D;
-      */
-
-      var skField = ecParams.Curve.RandomFieldElement(new SecureRandom());
-      var sk = skField.ToBigInteger();
-      this.sk = sk;
-      var PK = ecParams.G.Multiply(sk);
-      if (!PK.IsValid()) throw new Exception("PK not valid!");
-
-      //var privateKeyInfo = PrivateKeyInfoFactory.CreatePrivateKeyInfo(keyPair.Private);
-      //byte[] serializedPrivateBytes = privateKeyInfo.ToAsn1Object().GetDerEncoded();
-      //string serializedPrivate = Convert.ToBase64String(serializedPrivateBytes);
-      //Console.WriteLine($"sk: {serializedPrivate}");
-
-      Init(BLS12_381);
-      ETHmode();
-
-      var g2Str16 = "1 0x24aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8 0x13e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e 0x0ce5d527727d6e118cc9cdc6da2e351aadfd9baa8cbdd3a76d429a695160d12c923ac9cc3baca289e193548608b82801 0x0606c4a02ea734cc32acd2b02bc28b99cb3e287e85a763af267492ab572e99ab3f370d275cec1da1aaa9075ff05f79be";
-      var g2 = new G2(); //Zp
-      var T = new G2();
-      var t = new Fr();
-      t.SetByCSPRNG(); //sceglie ti casuale da Zp      
-      g2.SetStr(g2Str16, 16);
-      T.Mul(g2, t);   //Ti=g2^ti
-                      //Console.WriteLine($"g2: {g2.GetStr(16).Print()}");
-                      //Console.WriteLine($"t: {t.GetStr(16).Print()}");
-                      //Console.WriteLine($"T: {T.GetStr(16).Print()}");
-
-      //HashedRound=MAP_TO_POINT(SHA256(BIG_ENDIAN(round)))      
-      var bi_round = new BigInteger(round.ToString(), 10);
-      var bytes_Round = bi_round.ToByteArray();
-      var HC = new G1();
-      HC.HashAndMapTo(bytes_Round); //H1(C)
-
-      var Z = new GT();
-      var e = new GT();
-      e.Pairing(HC, PKLOE);   // e(H1(C),PKL)
-      Z.Pow(e, t);                   // Zi = e(H1(C),PKL)^ti
-      if (!Z.IsValid()) throw new Exception("Z not valid!");
-      //Console.WriteLine($"Z: {Z.GetStr(16).Print()}");
-
-      byte[] Zbytes = Z.Serialize();
-      byte[] HashZ = CryptoUtils.GetSHA256(Zbytes); // H(Zi)
-                                                    //Console.WriteLine($"Hash Z - SHA256: {BitConverter.ToString(HashZ).Replace("-","")}");
-
-      var ZBigInt = new BigInteger(HashZ);
-      var y = ZBigInt.Xor(sk);     //H(Zi) XOR ski
-
-      //imposto i valori pubblici      
-      this.PK = PK;
-      this.T = T;
-      this.y = y;
-
-      Console.WriteLine($"PK: {this.PK}");
-      Console.WriteLine($"T: {T.GetStr(16)}");
-      Console.WriteLine($"y: {y.ToString(16)}");
-
-      //elimino dalla memoria i valori privati
-      Z.Clear();
-      t.Clear();
-      sk = null;
-    }
-
     public BigInteger GetPrivateKey(G1 sigmaLOE)
     {
       Init(BLS12_381);
@@ -509,7 +432,7 @@ namespace TimeCryptor
 
       var retVerifiedContributors = new List<string>(); //lista dei contributiori validi, per cui la verifica delle prove h adato esito positivo
 
-      //sceglie un array di k bit casuali (usando gli interi 0 e 1)
+      //Il verifier sceglie un array di k bit casuali (usando gli interi 0 e 1)
       var b = new int[globalParams.k];
       Random r = new Random();
       while (b.Any(item => item == 1) == false)
@@ -520,8 +443,9 @@ namespace TimeCryptor
         }
       }
 
-      //sceglie un vettore di k bit casuali
+      //Recupera i dati dei parametri pubblici pubblicati dai contributori sulla blockchain 
       var bcRoundItemList = bc.PopByRound(round);
+
       foreach (var bcRoundItem in bcRoundItemList)
       {
         var contributor = contributors.Single(s => s.Name == bcRoundItem.contributorName);
@@ -579,6 +503,8 @@ namespace TimeCryptor
           check = proofToBeVerify.PK.Equals(PK_temp);             //g^(〖sk〗_(j,b_j)^' )==〖PK〗_(j,b_j )
           if (!check) break;
         }
+
+        //Se tutti i controlli (1)(2)(3) passano il contributore viene messo nella lista dei contributori validi
         if (check) retVerifiedContributors.Add(contributor.Name);
         Console.WriteLine($"Parte {contributor.Name} - Prova NIZK {((check) ? "valida" : "NON valida!")}");
       }
