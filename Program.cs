@@ -6,11 +6,16 @@
     {
       //PoC_RSW_Puzzle.TestPoC();
 
-      //PoC_TlcsMuon.TestPoC();
+      //PoC_TlcsMuon_i.TestPoC();
       PoC_TlcsMuon_ni.TestPoC();
 
       //Test_TimelockZone.Run_TestKeys();
+
       //Test_MCLlibrary.Run_TestPairing_BLS12_381();
+      //Test_MCLlibrary.RunTest_SerializeDeserialize();
+      //Test_MCLlibrary.Run_TestSerialization();
+      //Test_MCLlibrary.RunTest_CheckFirmaLOE();
+
       //Test_LOE.Run_TestFirma();
     }
   }

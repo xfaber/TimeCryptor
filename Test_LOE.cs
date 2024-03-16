@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Org.BouncyCastle.Math;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,6 +11,31 @@ namespace TimeCryptor
   public static class Test_LOE
   {
     //verifica che e(SIG_LOE,G2) = e(H(C),PK_LOE) dove C = SHA256(numero di round)
+
+    public static bool checkFirma(int round, G1 sigma, G2 pk)
+    {
+      Init(BLS12_381);
+      ETHmode();
+
+      var g2Str = "1 0x24aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8 0x13e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e 0x0ce5d527727d6e118cc9cdc6da2e351aadfd9baa8cbdd3a76d429a695160d12c923ac9cc3baca289e193548608b82801 0x0606c4a02ea734cc32acd2b02bc28b99cb3e287e85a763af267492ab572e99ab3f370d275cec1da1aaa9075ff05f79be";
+      var g2 = new G2(); //Zp
+      g2.SetStr(g2Str, 16);
+
+      var bi_round = new BigInteger(round.ToString(), 10);
+      var bytes_Round = bi_round.ToByteArray();
+      var h = new G1();
+      h.HashAndMapTo(bytes_Round);
+
+      var e1 = new GT();
+      e1.Pairing(sigma, g2);
+
+      var e2 = new GT();
+      e2.Pairing(h, pk);
+
+      var retCheck = e1.Equals(e2);
+      return retCheck;
+    }
+
     public static void Run_TestFirma()
     {
       /*  Output tests.c Iovino
