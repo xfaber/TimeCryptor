@@ -18,6 +18,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using TimeCryptor.Utils;
+using static mcl.MCL;
 using BigInteger = System.Numerics.BigInteger;
 
 namespace TimeCryptor
@@ -96,7 +97,7 @@ namespace TimeCryptor
       // SK - PRIVATE KEY
       // Calculate PK’ – DERIVED PUBLIC KEY
       var derivedPublicKey = ecParams.G.Multiply(sk);
-      Console.WriteLine($"derivedPublicKey: {derivedPublicKey}");
+      Console.WriteLine($"derivedPublicKey: {derivedPublicKey.ToCompressedPoint()}");
       //derivedPublicKey.Normalize();
       //Console.WriteLine($"derivedPublicKey (normalized): {derivedPublicKey}");
       //var derivedCompressedPublicKey = CompressWeierstrassBjjPoint(derivedPublicKey.XCoord.ToBigInteger(), derivedPublicKey.YCoord.ToBigInteger());
@@ -496,6 +497,18 @@ namespace TimeCryptor
     public static string ToCompressedPoint(this Org.BouncyCastle.Math.EC.ECPoint ecPoint)
     {
       byte[] compressedPoint = ecPoint.GetEncoded(true);
+      return BitConverter.ToString(compressedPoint).Replace("-", string.Empty);
+    }
+
+    public static string ToCompressedPoint(this G1 ecPoint)
+    {
+      byte[] compressedPoint = ecPoint.Serialize();
+      return BitConverter.ToString(compressedPoint).Replace("-", string.Empty);
+    }
+
+    public static string ToCompressedPoint(this G2 ecPoint)
+    {
+      byte[] compressedPoint = ecPoint.Serialize();
       return BitConverter.ToString(compressedPoint).Replace("-", string.Empty);
     }
 

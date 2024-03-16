@@ -64,5 +64,15 @@ namespace TimeCryptor
       }
     }
 
+    public static void RunTest_SerializeDeserialize()
+    {
+      /*
+      Console.WriteLine($"sigmaLOE: {BitConverter.ToString(((G1)sigmaLOE).Serialize()).Replace("-", string.Empty).ToLower()}");
+      var ser = BitConverter.ToString(((G1)sigmaLOE).Serialize()).Replace("-", string.Empty).ToLower();
+      var sigmaLOE2 = new G1();
+      sigmaLOE2.SetStr(ser, 16);
+      var chk = sigmaLOE.Equals(sigmaLOE2);
+      */
+    }
   }
 }
