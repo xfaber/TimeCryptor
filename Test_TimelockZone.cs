@@ -18,7 +18,7 @@ namespace TimeCryptor
       BLS12_381
     }
 
-    public static void Run_TestKeys()
+    public static void Run_Test_ValidationKeys()
     {
 
       var timeLockZone = new TimeLockZone();

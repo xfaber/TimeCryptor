@@ -16,7 +16,7 @@ namespace TimeCryptor
     static Contributor[] _contributors = null;
 
     //Crea una coppia di chiavi per la curva ellittica scelta ed effettua una cifratura/decifratura di un messaggio con ECIES
-    public static void TestPoC()
+    public static void Run_PoC()
     {
       // LOE Round di riferimento
       //"round": 9792114,      

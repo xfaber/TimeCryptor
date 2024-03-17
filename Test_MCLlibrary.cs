@@ -19,7 +19,7 @@ namespace TimeCryptor
       Console.WriteLine("ERR {0}", msg);
       err++;
     }
-    public static void Run_TestPairing_BLS12_381()
+    public static void Run_Test_Pairing_BLS12_381()
     {
       Init(BLS12_381);
 
@@ -66,7 +66,7 @@ namespace TimeCryptor
       }
     }
 
-    public static void Run_TestSerialization()
+    public static void Run_Test_Serialization()
     {
       int round;
       G2 pk;
@@ -102,7 +102,7 @@ namespace TimeCryptor
       Console.WriteLine($"pk==pk2: {chk}");
     }
 
-    public static void RunTest_CheckFirma()
+    public static void Run_Test_CheckFirma()
     {
       //Test di una firma BLS
       Init(BLS12_381);
@@ -210,7 +210,7 @@ namespace TimeCryptor
       var e2 = new GT();
       e2.Pairing(h, pk);
     }
-    public static void RunTest_SerializeDeserialize()
+    public static void Run_Test_SerializeDeserialize()
     {
       Init(BLS12_381);
       ETHmode();

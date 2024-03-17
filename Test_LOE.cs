@@ -36,7 +36,7 @@ namespace TimeCryptor
       return retCheck;
     }
 
-    public static void Run_TestFirma()
+    public static void Run_Test_Firma()
     {
       /*  Output tests.c Iovino
             0
