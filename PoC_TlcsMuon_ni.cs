@@ -157,7 +157,7 @@ namespace TimeCryptor
         this.Round = round;
         this.Name = contributorName;
       }
-      public PK_T_y_ItemExtended getPK_T_y(int round, G2 PKLOE, BigInteger sk)
+      public PK_T_y_ItemExtended GetPK_T_y(int round, G2 PKLOE, BigInteger sk)
       {
         Init(BLS12_381);
         ETHmode();
@@ -257,7 +257,7 @@ namespace TimeCryptor
         if (!PK.IsValid()) throw new Exception("PK not valid!");
         
         //CREA la lista delle tuple (〖PK〗_(j,b),T_(j,b),y_(j,b) )_(j∈[k],b∈{1,2} )
-        var pp = getPK_T_y(round, PKLOE, sk);
+        var pp = GetPK_T_y(round, PKLOE, sk);
         //imposto i valori pubblici      
         this.PK = pp.PK;
         this.T = pp.T;
@@ -282,8 +282,8 @@ namespace TimeCryptor
           }
           array_sk[1] = sk.Subtract(array_sk[0]);
           this.proof[j] = new Proof_Item();
-          this.proof[j].left = getPK_T_y(round, PKLOE, array_sk[0]);
-          this.proof[j].right = getPK_T_y(round, PKLOE, array_sk[1]);
+          this.proof[j].left = GetPK_T_y(round, PKLOE, array_sk[0]);
+          this.proof[j].right = GetPK_T_y(round, PKLOE, array_sk[1]);
 
           //array_b_string += this.proof[j].left.PK.Normalize().ToCompressedPoint() + this.proof[j].left.T.GetStr(16) + this.proof[j].left.y;
           //array_b_string += this.proof[j].right.PK.Normalize().ToCompressedPoint() + this.proof[j].right.T.GetStr(16) + this.proof[j].right.y;
@@ -312,7 +312,7 @@ namespace TimeCryptor
 
         return sk;
       }
-      public bool checkSK(BigInteger skToCheck)
+      public bool CheckSK(BigInteger skToCheck)
       {
         return this.sk.Equals(skToCheck);
       }

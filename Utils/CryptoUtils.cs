@@ -707,7 +707,7 @@ namespace TimeCryptor
       return (int)ret;
     }
 
-    public static keypairsGenerationData TLCS_GenerateKey(DateTime futureDateTime, int pubKeyTimeOffsetSeconds)
+    public static KeypairsGenerationData TLCS_GenerateKey(DateTime futureDateTime, int pubKeyTimeOffsetSeconds)
     {
       /*
         roundtime '2023-12-18T13:01'
@@ -776,7 +776,7 @@ namespace TimeCryptor
         "height": "674892"
       }
       */
-      var retJsonObj = Newtonsoft.Json.JsonConvert.DeserializeObject<keypairsGenerationData>(retData.Substring(7));
+      var retJsonObj = Newtonsoft.Json.JsonConvert.DeserializeObject<KeypairsGenerationData>(retData.Substring(7));
 
       return retJsonObj;
     }

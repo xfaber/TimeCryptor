@@ -66,7 +66,7 @@ namespace TimeCryptor
       var pk = new G2(); //Zp
       pk.Mul(g2, sk);
 
-      //firma il messaggio s = sk H(msg)
+      //firma il messaggio calcolando s = sk H(msg)
       var bi_round = new BigInteger(round.ToString(), 10);
       var bytes_Round = bi_round.ToByteArray();
       var h = new G1();

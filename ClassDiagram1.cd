@@ -1,0 +1,229 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="TimeCryptor.Utils.BJJUtils" Collapsed="true">
+    <Position X="15" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ABAAAAAAAAAAAAAACAAAAAAAAgAAAAAAAAAAAAAEAhA=</HashCode>
+      <FileName>Utils\BJJUtils.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TimeCryptor.Utils.Logger" Collapsed="true">
+    <Position X="13.25" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Utils\Logger.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TimeCryptor.BJJDomainParameters_M" Collapsed="true">
+    <Position X="11.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAQAAAAAAAAA=</HashCode>
+      <FileName>Utils\CryptoUtils.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TimeCryptor.BJJDomainParameters_TE" Collapsed="true">
+    <Position X="13.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAIAQAAAAAAIAQAAAAAAAAAAAAAAAAkVEAAAAAAAAA=</HashCode>
+      <FileName>Utils\CryptoUtils.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TimeCryptor.CryptoUtils">
+    <Position X="15" Y="5.25" Width="3.25" />
+    <NestedTypes>
+      <Enum Name="TimeCryptor.CryptoUtils.ECname" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Utils\CryptoUtils.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>ATAAQQAkEgAKEkAQCQIkICMCsiABEIBAAOwAIEBUAhA=</HashCode>
+      <FileName>Utils\CryptoUtils.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TimeCryptor.ST_Solution" Collapsed="true">
+    <Position X="15" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAQAACAEEAAA=</HashCode>
+      <FileName>Utils\CryptoUtils.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TimeCryptor.ECIES" Collapsed="true">
+    <Position X="13.25" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQAAAAAAAAAAAAAQAAAAAAAAAABAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Utils\ECIES.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TimeCryptor.keypairsGenerationData" Collapsed="true">
+    <Position X="15" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAQCAAAAAAAAAgAAAAAAAAAAAIAAAAA=</HashCode>
+      <FileName>Utils\keypairsGenerationData.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TimeCryptor.Check_Tx" Collapsed="true">
+    <Position X="16.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgAAAAAABRAAAAAAAAACAYAIAAAAAIAQAAQAAAAAAA=</HashCode>
+      <FileName>Utils\keypairsGenerationData.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TimeCryptor.Deliver_Tx" Collapsed="true">
+    <Position X="11.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAABBAAAAAAAAACAIAIAAAAAIAQAAQAAAAAAA=</HashCode>
+      <FileName>Utils\keypairsGenerationData.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TimeCryptor.LoeRound" Collapsed="true">
+    <Position X="11.5" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAQAAAAAAAAAAAAAAAAAQAAAAAAAAAgAAAAAAAAA=</HashCode>
+      <FileName>Utils\LoeRound.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TimeCryptor.TlcsKeyPairs" Collapsed="true">
+    <Position X="16.75" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Utils\TlcsKeyPairs.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TimeCryptor.tlcskeypair" Collapsed="true">
+    <Position X="15" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QQAAAAAAAAAAAAAAgAAIAAAAAAAAhAAAAgAAABAAAAA=</HashCode>
+      <FileName>Utils\TlcsKeyPairs.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TimeCryptor.LeagueOfEntropy" Collapsed="true">
+    <Position X="18.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CAACAAAIAEAAAAAAAAACAAAAAAAAAAAQAAAAADAAAAA=</HashCode>
+      <FileName>LeagueOfEntropy.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TimeCryptor.PoC_RSW_Puzzle" Collapsed="true">
+    <Position X="15" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAABAAAABAAAAAAAAAAAAACAAAAAAAAgAAAA=</HashCode>
+      <FileName>PoC_RSW_Puzzle.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TimeCryptor.PoC_TlcsMuon_i">
+    <Position X="4" Y="0.5" Width="2.25" />
+    <Compartments>
+      <Compartment Name="Nested Types" Collapsed="false" />
+    </Compartments>
+    <NestedTypes>
+      <Class Name="TimeCryptor.PoC_TlcsMuon_i.Contributor">
+        <TypeIdentifier>
+          <NewMemberFileName>PoC_TlcsMuon_i.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+      <Class Name="TimeCryptor.PoC_TlcsMuon_i.Blockchain">
+        <TypeIdentifier>
+          <NewMemberFileName>PoC_TlcsMuon_i.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+      <Class Name="TimeCryptor.PoC_TlcsMuon_i.Proof_Item" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>PoC_TlcsMuon_i.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+      <Class Name="TimeCryptor.PoC_TlcsMuon_i.SmartContract">
+        <TypeIdentifier>
+          <NewMemberFileName>PoC_TlcsMuon_i.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+      <Class Name="TimeCryptor.PoC_TlcsMuon_i.PK_T_y_Item" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>PoC_TlcsMuon_i.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+      <Class Name="TimeCryptor.PoC_TlcsMuon_i.Proof_ItemOnBlockchain" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>PoC_TlcsMuon_i.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+      <Class Name="TimeCryptor.PoC_TlcsMuon_i.GlobalParams">
+        <TypeIdentifier>
+          <NewMemberFileName>PoC_TlcsMuon_i.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+      <Class Name="TimeCryptor.PoC_TlcsMuon_i.PK_T_y_ItemExtended" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>PoC_TlcsMuon_i.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+      <Class Name="TimeCryptor.PoC_TlcsMuon_i.Blockchain_Item">
+        <TypeIdentifier>
+          <NewMemberFileName>PoC_TlcsMuon_i.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAAgAAAAAAAAAAAAAAAAAAAAEAAAAigAAAAAAAAAAAA=</HashCode>
+      <FileName>PoC_TlcsMuon_i.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TimeCryptor.PoC_TlcsMuon_ni" Collapsed="true">
+    <Position X="18.5" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAgAAAAAAAAAAAAAAAAAAAAEAAAAigAAAAAAAAAAAA=</HashCode>
+      <FileName>PoC_TlcsMuon_ni.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TimeCryptor.PoC_Tlock" Collapsed="true">
+    <Position X="11.5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAACAAAEAACAAAAAAAAAAAAAAAAACAAAAAAAAAAAOA=</HashCode>
+      <FileName>PoC_Tlock.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TimeCryptor.Program">
+    <Position X="18.75" Y="5.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAA=</HashCode>
+      <FileName>Program.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TimeCryptor.Test_LOE" Collapsed="true">
+    <Position X="16.75" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Test_LOE.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TimeCryptor.Test_MCLlibrary" Collapsed="true">
+    <Position X="18.5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAiAAAAAEAAAAAAAAAAAAAACAAAASAAQAAAAAABAAA=</HashCode>
+      <FileName>Test_MCLlibrary.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TimeCryptor.Test_TimelockZone" Collapsed="true">
+    <Position X="11.5" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAIAAAAAAAAAA=</HashCode>
+      <FileName>Test_TimelockZone.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TimeCryptor.TimeLockZone" Collapsed="true">
+    <Position X="13.25" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAQ=</HashCode>
+      <FileName>Test_TimelockZone.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TimeCryptor.KeyPairToCheck" Collapsed="true">
+    <Position X="16.75" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAADAAAAAAAAAAAAAAQAAAAAAAAAAAAAgAAAAAIAgAA=</HashCode>
+      <FileName>Test_TimelockZone.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

@@ -1,6 +1,6 @@
 ﻿namespace TimeCryptor
 {
-  public class keypairsGenerationData
+  public class KeypairsGenerationData
   {
     public Check_Tx check_tx { get; set; }
     public Deliver_Tx deliver_tx { get; set; }

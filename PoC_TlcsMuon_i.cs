@@ -35,7 +35,7 @@ namespace TimeCryptor
       Console.WriteLine($"parametro di sicurezza k: {_globalParams.k}");
       Console.WriteLine($"Curva ellittica scelta: {_globalParams.ecCurveName}");
 
-      //IMPOSTO LA DATA FUTURA, RECUPERO LA DATA FUTURA
+      //IMPOSTO LA DATA FUTURA e RECUPERO IL NUMERO DI ROUND
       //var round = 10750255;
       var futureDateTime = DateTime.Now.AddSeconds(5);
       var round = LeagueOfEntropy.GetRound(futureDateTime);
@@ -68,20 +68,20 @@ namespace TimeCryptor
         var check = false;
         for (int j = 0; j < _globalParams.k; j++)
         {
-          //Simula l'interazione tra verifier e prover - il verifier richiede al prover il parametro privato della prova che vuole verificare (in base al valore d alui scelto nell'array b)
-          PK_T_y_ItemExtended contributorProofData = null;
+          //Simula l'interazione tra verifier e prover - il verifier richiede al prover il parametro privato t della prova che vuole verificare (in base al valore casuale da lui scelto nell'array di bit rndBitArray)
+          Fr tFromContributor;
           switch (rndBitArray[j])
           {
-            case 0:              
-              contributorProofData = contributor.proof[j].left;
+            case 0:
+              tFromContributor = contributor.proof[j].left.t; 
               break;
             case 1:
-              contributorProofData = contributor.proof[j].right;
+              tFromContributor = contributor.proof[j].right.t;
               break;
             default:
               throw new Exception("rndBitArray array contain invalid values!");
           }
-          check = SmartContract.Verify(round, j, rndBitArray, bcRoundItem, contributorProofData.t, _globalParams);
+          check = SmartContract.Verify(round, j, rndBitArray, bcRoundItem, tFromContributor, _globalParams);
           if (!check) break;
         }
         //Se tutti i controlli (1)(2)(3) passano il contributore viene messo nella lista dei contributori validi
@@ -185,7 +185,7 @@ namespace TimeCryptor
         this.Name = contributorName;
       }
 
-      public PK_T_y_ItemExtended getPK_T_y(int round, G2 PKLOE, BigInteger sk)
+      public PK_T_y_ItemExtended GetPK_T_y(int round, G2 PKLOE, BigInteger sk)
       {
         Init(BLS12_381);
         ETHmode();
@@ -271,7 +271,7 @@ namespace TimeCryptor
         var PK = ecParams.G.Multiply(sk);
         if (!PK.IsValid()) throw new Exception("PK not valid!");
 
-        var pp = getPK_T_y(round, PKLOE, sk);
+        var pp = GetPK_T_y(round, PKLOE, sk);
         //imposto i valori pubblici      
         this.PK = pp.PK;
         this.T = pp.T;
@@ -295,8 +295,8 @@ namespace TimeCryptor
           }
           array_sk[1] = sk.Subtract(array_sk[0]);
           proof[j] = new Proof_Item();
-          proof[j].left = getPK_T_y(round, PKLOE, array_sk[0]);
-          proof[j].right = getPK_T_y(round, PKLOE, array_sk[1]);
+          proof[j].left = GetPK_T_y(round, PKLOE, array_sk[0]);
+          proof[j].right = GetPK_T_y(round, PKLOE, array_sk[1]);
         }
 
       }
@@ -321,7 +321,7 @@ namespace TimeCryptor
 
         return sk;
       }
-      public bool checkSK(BigInteger skToCheck)
+      public bool CheckSK(BigInteger skToCheck)
       {
         return this.sk.Equals(skToCheck);
       }
