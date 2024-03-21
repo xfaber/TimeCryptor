@@ -68,7 +68,7 @@ namespace TimeCryptor
 
     public static void Run_Test_Serialization()
     {
-      int round;
+      ulong round;
       G2 pk;
       G1 sigma;
       //var round = LeagueOfEntropy.GetRound(DateTime.Now);
@@ -111,7 +111,7 @@ namespace TimeCryptor
       //https://api.drand.sh/52db9ba70e0cc0f6eaf7803dd07447a1f5477735fd3f661792ba94600c84e971/info
       //https://api.drand.sh/52db9ba70e0cc0f6eaf7803dd07447a1f5477735fd3f661792ba94600c84e971/public/5928395
       Console.WriteLine("=== KEYS AND SIGNS FROM DRAND (SCHEMA: bls-unchained-g1-rfc9380) ===");
-      var round = 5928395;
+      ulong round = 5928395;
       var pkHexString = "83cf0f2896adee7eb8b5f01fcad3912212c437e0073e911fb90022d3e760183c8c4b450b6a0a6c3ac6a5776a2d1064510d1fec758c921cc22b0e17e63aaf4bcb5ed66304de9cf809bd274ca73bab4af5a6e9c76a4bc09e76eae8991ef5ece45a";
       var sigmaHexString = "a5d07c0071b4e386b3ae09206522253c68fefe8490ad59ecc44a7dd0d0745be91da5779e2247a82403fbc0cb9a34cb61";
       checkFirma(round, pkHexString, sigmaHexString);
@@ -133,7 +133,7 @@ namespace TimeCryptor
       sigmaHexString = sigma.ToCompressedPoint();
       checkFirma(round, pkHexString, sigmaHexString);
     }
-    public static bool checkFirma(int round, G2 pk, G1 sigma)
+    public static bool checkFirma(ulong round, G2 pk, G1 sigma)
     {
       Init(BLS12_381);
       ETHmode();
@@ -157,7 +157,7 @@ namespace TimeCryptor
       return retCheck;
     }
 
-    public static void checkFirma(int round, string pkHexString, string sigmaHexString)
+    public static void checkFirma(ulong round, string pkHexString, string sigmaHexString)
     {
       Console.WriteLine($"round: {round}");
       var pk = new G2();
@@ -177,7 +177,7 @@ namespace TimeCryptor
       var chk = checkFirma(round, pk, sigma);
       Console.WriteLine($"=== CHECK SIGN: {chk} ===\n\n");
     }
-    private static void GetRandomSigma(int round, out G2 pk, out G1 sigma)
+    private static void GetRandomSigma(ulong round, out G2 pk, out G1 sigma)
     {
       //Test di una firma BLS
       Init(BLS12_381);

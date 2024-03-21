@@ -18,7 +18,7 @@ namespace TimeCryptor
     private Fr sk { get; set; }
     private G1 sigma { get; set; }
 
-    public static bool checkFirma(int round, G1 sigma, G2 pk)
+    public static bool checkFirma(ulong round, G1 sigma, G2 pk)
     {
       Init(BLS12_381);
       ETHmode();
@@ -27,10 +27,11 @@ namespace TimeCryptor
       var g2 = new G2(); //Zp
       g2.SetStr(g2Str, 16);
 
-      var bi_round = new BigInteger(round.ToString(), 10);
-      var bytes_Round = bi_round.ToByteArray();
+      var rbytes_le = BitConverter.GetBytes(round);   //--> little-endian
+      var rbytes_be = rbytes_le.Reverse().ToArray();  //--> big-endian
+      var rHash = CryptoUtils.GetSHA256(rbytes_be);
       var h = new G1();
-      h.HashAndMapTo(bytes_Round);
+      h.HashAndMapTo(rHash);
 
       var e1 = new GT();
       e1.Pairing(sigma, g2);
@@ -48,7 +49,7 @@ namespace TimeCryptor
     /// </summary>
     /// <param name="round">il numero di round</param>
     /// <returns>(Fr sk, G2 pk, G1 sigma)</returns>
-    public void CreateKeyPair(int round)
+    public void CreateKeyPair(ulong round)
     {
       //Test di una firma BLS
       Init(BLS12_381);
@@ -67,10 +68,11 @@ namespace TimeCryptor
       pk.Mul(g2, sk);
 
       //firma il messaggio calcolando s = sk H(msg)
-      var bi_round = new BigInteger(round.ToString(), 10);
-      var bytes_Round = bi_round.ToByteArray();
+      var rbytes_le = BitConverter.GetBytes(round);   //--> little-endian
+      var rbytes_be = rbytes_le.Reverse().ToArray();  //--> big-endian
+      var rHash = CryptoUtils.GetSHA256(rbytes_be);
       var h = new G1();
-      h.HashAndMapTo(bytes_Round);
+      h.HashAndMapTo(rHash);
       var sigma = new G1();
       sigma.Mul(h, sk);
 
@@ -103,26 +105,26 @@ namespace TimeCryptor
     /// </summary>
     /// <param name="futureDateTime">Data futura</param>
     /// <returns></returns>
-    public static int GetRound(DateTime futureDateTime)
+    public static ulong GetRound(DateTime futureDateTime)
     {
       const int drand_genesis_time = 1692803367; //drand quicknet genesis time
       const int period = 3;
       decimal futureDateTime_unix = ((DateTimeOffset)futureDateTime).ToUnixTimeSeconds();
       decimal round = ((futureDateTime_unix - drand_genesis_time) / period); //Valore intero minimo maggiore o uguale a round (arrotondamento divisione per eccesso es. 1.3 => 2)
       var ret = Math.Ceiling(round);
-      return (int)ret;
+      return (ulong)ret;
     }
 
-    public static DateTime GetDateFromRound(int round)
+    public static DateTime GetDateFromRound(ulong round)
     {
       const int drand_genesis_time = 1692803367; //drand quicknet genesis time
       const int period = 3;
       var d = (round * period) + drand_genesis_time;
-      var retDate = DateTimeOffset.FromUnixTimeSeconds(d);
+      var retDate = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt64(d));
       return retDate.DateTime.ToLocalTime();
     }
 
-    public G1? GetSigma(int round)
+    public G1? GetSigma(ulong round)
     {
       if (DateTime.Now >= GetDateFromRound(round))
         return this.sigma;

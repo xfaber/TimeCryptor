@@ -54,7 +54,7 @@ namespace TimeCryptor
         "signature": "95f058cbd1294bc3fa28647dabded06d50b543643fb04e1cb2c5b6204daf20935782f7cae5fa7718cf87b4c43d108842"
       }
       */
-      var round = 5358915;
+      ulong round = 5358915;
       var PKLOEstring = "83cf0f2896adee7eb8b5f01fcad3912212c437e0073e911fb90022d3e760183c8c4b450b6a0a6c3ac6a5776a2d1064510d1fec758c921cc22b0e17e63aaf4bcb5ed66304de9cf809bd274ca73bab4af5a6e9c76a4bc09e76eae8991ef5ece45a";
       var sigLOEstring = "95f058cbd1294bc3fa28647dabded06d50b543643fb04e1cb2c5b6204daf20935782f7cae5fa7718cf87b4c43d108842";
 
@@ -87,7 +87,7 @@ namespace TimeCryptor
       */
       #endregion
 
-      var round = 18925798;
+      ulong round = 18925798;
       var PKLOEstring = "8200fc249deb0148eb918d6e213980c5d01acd7fc251900d9260136da3b54836ce125172399ddc69c4e3e11429b62c11";
       var sigLOEstring = "adb9c7c781edc13a5a48e0887b23cc33f4164cb715967b0d11d518980c564eefe7a6a44c5d1c7d2158b20f75fc5bf35507bafd20b355abc62443c01e6343c2574435e4ef437ca07cfa946cdd2537dc76aa3b9af6c718561089462f6a2bae6189";
 
@@ -127,7 +127,7 @@ namespace TimeCryptor
       throw new Exception("invalid proof: rP check failed");
     }
 
-    public static (G1 U, BigInteger V, BigInteger W) Encrypt_BLSonG2(int round, string PKLOEstring)
+    public static (G1 U, BigInteger V, BigInteger W) Encrypt_BLSonG2(ulong round, string PKLOEstring)
     {
       Init(BLS12_381);
       //ETHmode();
@@ -141,7 +141,7 @@ namespace TimeCryptor
       */
 
       //byte[] roundBytes = BitConverter.GetBytes(round);
-      //int roundBigEndian = BitConverter.ToInt32(BitConverter.GetBytes(round), 0);
+      //ulong roundBigEndian = BitConverter.ToInt32(BitConverter.GetBytes(round), 0);
       //byte[] roundBigEndianBytes = BitConverter.GetBytes(roundBigEndian);
       //if (BitConverter.IsLittleEndian) Array.Reverse(roundBigEndianBytes);
 
@@ -241,11 +241,11 @@ namespace TimeCryptor
       else return "ERROR!";
     }
 
-    public static (G2 U, BigInteger V, BigInteger W) Encrypt_BLSonG1(int round, string PKLOEstring)
+    public static (G2 U, BigInteger V, BigInteger W) Encrypt_BLSonG1(ulong round, string PKLOEstring)
     {
       Init(BLS12_381);
       ETHmode();
-
+      G1setDst("BLS_SIG_BLS12381G1_XMD:SHA-256_SSWU_RO_NUL_");
       /*
       var SigLOEString = "9544ddce2fdbe8688d6f5b4f98eed5d63eee3902e7e162050ac0f45905a55657714880adabe3c3096b92767d886567d0";
       var bytes_test = FromHexStr(SigLOEString);
@@ -255,20 +255,14 @@ namespace TimeCryptor
       Console.WriteLine($"SHA256 {sha256_SigLOEString==randomness}");
       */
 
-      //byte[] roundBytes = BitConverter.GetBytes(round);
-      //int roundBigEndian = BitConverter.ToInt32(BitConverter.GetBytes(round), 0);
-      //byte[] roundBigEndianBytes = BitConverter.GetBytes(roundBigEndian);
-      //if (BitConverter.IsLittleEndian) Array.Reverse(roundBigEndianBytes);
 
       //Calcola H1(Sha256(round)) appartiene a G1
-      var fpRound = new Fp(); // Fr 32Byte -- Fp 48Byte
-      fpRound.SetInt(round);
-      var bytes_Round = fpRound.Serialize();
-      //var bi_round = new BigInteger(round.ToString(), 10);
-      //var bytes_Round = bi_round.ToByteArray();
-      G1setDst("BLS_SIG_BLS12381G2_XMD:SHA-256_SSWU_RO_NUL_");
+      var rbytes_le = BitConverter.GetBytes(round);   //--> little-endian
+      var rbytes_be = rbytes_le.Reverse().ToArray();  //--> big-endian
+      var rHash = CryptoUtils.GetSHA256(rbytes_be);
+      G1setDst("BLS_SIG_BLS12381G1_XMD:SHA-256_SSWU_RO_NUL_");
       var HC = new G1();
-      HC.HashAndMapTo(bytes_Round);
+      HC.HashAndMapTo(rHash);
       Console.WriteLine($"HC: {HC.GetStr(16)}");
 
       // Carica P (chiave pubblica della rete drand di LOE)
@@ -329,6 +323,7 @@ namespace TimeCryptor
     {
       Init(BLS12_381);
       ETHmode();
+      G1setDst("BLS_SIG_BLS12381G1_XMD:SHA-256_SSWU_RO_NUL_");
 
       // Calcola sigma' = V xor H2(e(sigLOE,U))      
       var SigLOE = new G1();

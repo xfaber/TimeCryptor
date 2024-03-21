@@ -340,7 +340,7 @@ namespace TimeCryptor
 
       #endregion
     }
-    public KeyPairToCheck GetKeyPair(int round)
+    public KeyPairToCheck GetKeyPair(ulong round)
     {
       return listKeyPair.Single(s => s.Round == round);
     }
@@ -348,7 +348,7 @@ namespace TimeCryptor
   public class KeyPairToCheck
   {
     public int Id { get; set; }
-    public int Round { get; set; }
+    public ulong Round { get; set; }
     public string PublicKeyHex { get; set; } //Twisted Edwards Form
     public string PublicKeyHexW { get; set; } //Weierstrass Form
     public string PrivateKeyHex { get; set; }

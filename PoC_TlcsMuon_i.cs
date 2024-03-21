@@ -36,9 +36,9 @@ namespace TimeCryptor
       Console.WriteLine($"Curva ellittica scelta: {_globalParams.ecCurveName}");
 
       //IMPOSTO LA DATA FUTURA e RECUPERO IL NUMERO DI ROUND
-      //var round = 10750255;
+      //ulong round = 10750255;
       var futureDateTime = DateTime.Now.AddSeconds(5);
-      var round = LeagueOfEntropy.GetRound(futureDateTime);
+      ulong round = LeagueOfEntropy.GetRound(futureDateTime);
       Console.WriteLine($"Data futura impostata: {futureDateTime.ToString("dd/MM/yyyy HH:mm:ss")} round:{round}");
       _LOE.CreateKeyPair(round);
       _globalParams.PKLOE = (G2)_LOE.pk;
@@ -51,49 +51,19 @@ namespace TimeCryptor
         var P = new Contributor($"P{i}", _globalParams.ecParams, _globalParams.k, round);
         P.SetPublicParams(round, _globalParams.PKLOE);
 
-        if (i == 2) P.PublishToBlockchain(_blockChain, true); //simula un contributo non onesto
-        else P.PublishToBlockchain(_blockChain);
+        if (i == 2) P.PublishToBlockchain(true); //simula un contributo non onesto
+        else P.PublishToBlockchain();
         _contributors[i - 1] = P;
       }
 
       //PROCEDURA DI VERIFICA DELLE PROVE 
       Console.WriteLine("\n=== VERIFICA DELLE PROVE ===");
-      var verifiedContributorNameList = new List<string>();
-      var bcRoundItemList = _blockChain.PopByRound(round);
-      foreach (var bcRoundItem in bcRoundItemList)
-      {
-        var rndBitArray = SmartContract.ChooseRandomBitArray(_globalParams.k);
-        var contributor = _contributors.Single(s => s.Name == bcRoundItem.contributorName);
-
-        var check = false;
-        for (int j = 0; j < _globalParams.k; j++)
-        {
-          //Simula l'interazione tra verifier e prover - il verifier richiede al prover il parametro privato t della prova che vuole verificare (in base al valore casuale da lui scelto nell'array di bit rndBitArray)
-          Fr tFromContributor;
-          switch (rndBitArray[j])
-          {
-            case 0:
-              tFromContributor = contributor.proof[j].left.t; 
-              break;
-            case 1:
-              tFromContributor = contributor.proof[j].right.t;
-              break;
-            default:
-              throw new Exception("rndBitArray array contain invalid values!");
-          }
-          check = SmartContract.Verify(round, j, rndBitArray, bcRoundItem, tFromContributor, _globalParams);
-          if (!check) break;
-        }
-        //Se tutti i controlli (1)(2)(3) passano il contributore viene messo nella lista dei contributori validi
-        if (check) verifiedContributorNameList.Add(bcRoundItem.contributorName);
-        Console.WriteLine($"Parte {bcRoundItem.contributorName} - Prova NIZK {((check) ? "valida" : "NON valida!")}");
-      }
+      var verifiedContributorNameList = SmartContract.Verify(round);
       Console.WriteLine($"Parti valide {verifiedContributorNameList.Count}/{_globalParams.numeroContributori}");
-
 
       //PROCEDURA DI AGGREGAZIONE
       Console.WriteLine("\n=== AGGREGAZIONE - CALCOLO MPK_R ===");
-      var MPK_R = SmartContract.Aggregate(round, _blockChain, verifiedContributorNameList);
+      var MPK_R = SmartContract.Aggregate(round, verifiedContributorNameList);
 
       //ENCRYPT            
       Console.WriteLine($"\n=== CIFRATURA CON LA CHIAVE MPK_R ===");
@@ -124,7 +94,7 @@ namespace TimeCryptor
       //PROCEDURA DI INVERSIONE
       Console.WriteLine("\n=== INVERSIONE - CALCOLO DI sk_R ===");
       Console.WriteLine("\n=== Calcolo della sk_R - procedura di aggregazione delle chiavi segrete parziali sk della parti ===");
-      var sk_R = SmartContract.Invert(round, (G1)sigmaLOE, _blockChain, _globalParams.ecParams, verifiedContributorNameList);
+      var sk_R = SmartContract.Invert(round, (G1)sigmaLOE, _globalParams.ecParams, verifiedContributorNameList);
       Console.WriteLine($"sk_R: {sk_R.ToString(16)}");
       CryptoUtils.CheckValidKeyPair(MPK_R, sk_R, _globalParams.ecParams);
 
@@ -143,6 +113,23 @@ namespace TimeCryptor
       Console.WriteLine($"Testo decifrato: {plainText}");
     }
 
+    public static Fr Get_t_fromContributor(ulong round, string contributorName, int proofId, int randomBit)
+    {
+      Fr t;
+      var contributor = _contributors.Single(s => s.Name == contributorName);
+      switch (randomBit)
+      {
+        case 0:
+          t = contributor.proof[proofId].left.t;
+          break;
+        case 1:
+          t = contributor.proof[proofId].right.t;
+          break;
+        default:
+          throw new Exception("rndBitArray array contain invalid values!");
+      }
+      return t;
+    }
     public class GlobalParams
     {
       public GlobalParams()
@@ -164,10 +151,10 @@ namespace TimeCryptor
     public class Contributor
     {
       private int k { get; set; }
-      private int Round { get; set; }
+      private ulong round { get; set; }
       public string Name { get; set; }
       public ECDomainParameters ecParams { get; set; }
-      
+
       private BigInteger sk { get; set; }
       //public Fr t { get; set; }
       private BigInteger Z { get; set; }
@@ -177,15 +164,15 @@ namespace TimeCryptor
       public BigInteger y { get; set; }
 
       public Proof_Item[] proof { get; set; }
-      public Contributor(string contributorName, ECDomainParameters ecDomainParameters, int k, int round)
+      public Contributor(string contributorName, ECDomainParameters ecDomainParameters, int k, ulong round)
       {
         this.ecParams = ecDomainParameters;
         this.k = k;
-        this.Round = round;
+        this.round = round;
         this.Name = contributorName;
       }
 
-      public PK_T_y_ItemExtended GetPK_T_y(int round, G2 PKLOE, BigInteger sk)
+      public PK_T_y_ItemExtended GetPK_T_y(ulong round, G2 PKLOE, BigInteger sk)
       {
         Init(BLS12_381);
         ETHmode();
@@ -235,10 +222,10 @@ namespace TimeCryptor
         return (new PK_T_y_ItemExtended() { PK = PK, T = T, y = y, t = t });
       }
 
-      public void PublishToBlockchain(Blockchain bc, bool simulaContributoriNonOnesto = false)
+      public void PublishToBlockchain(bool simulaContributoriNonOnesto = false)
       {
         var item = new Blockchain_Item();
-        item.round = this.Round;
+        item.round = this.round;
         item.pp = new PK_T_y_Item() { PK = this.PK, T = this.T, y = this.y };
         item.proof = new Proof_ItemOnBlockchain[this.k];
         for (int i = 0; i < this.k; i++)
@@ -259,10 +246,10 @@ namespace TimeCryptor
         }
 
         item.contributorName = this.Name;
-        bc.Put(item);
+        _blockChain.Put(item);
       }
 
-      public void SetPublicParams(int round, G2 PKLOE)
+      public void SetPublicParams(ulong round, G2 PKLOE)
       {
         Console.WriteLine($"\n=== Creazione parametri pubblici della Parte {this.Name} ===");
         var skField = ecParams.Curve.RandomFieldElement(new SecureRandom());
@@ -275,7 +262,7 @@ namespace TimeCryptor
         //imposto i valori pubblici      
         this.PK = pp.PK;
         this.T = pp.T;
-        this.y = pp.y;        
+        this.y = pp.y;
         Console.WriteLine($"PK: {this.PK}");
         Console.WriteLine($"T: {this.T.GetStr(16)}");
         Console.WriteLine($"y: {this.y.ToString(16)}");
@@ -344,15 +331,41 @@ namespace TimeCryptor
         return b;
       }
 
+      public static List<string> Verify(ulong round)
+      {
+        var verifiedContributorNameList = new List<string>();
+        var bcRoundItemList = _blockChain.PopByRound(round);
+        foreach (var bcRoundItem in bcRoundItemList)
+        {
+          var rndBitArray = SmartContract.ChooseRandomBitArray(_globalParams.k);
+          var contributor = _contributors.Single(s => s.Name == bcRoundItem.contributorName);
+
+          var check = false;
+          for (int j = 0; j < _globalParams.k; j++)
+          {
+            //Simula l'interazione tra verifier e prover - il verifier richiede al prover il parametro privato t della prova che vuole verificare (in base al valore casuale da lui scelto nell'array di bit rndBitArray)
+            var tFromContributor = Get_t_fromContributor(round, bcRoundItem.contributorName, j, rndBitArray[j]);
+            
+            check = SmartContract.VerifyProof(round, j, rndBitArray, bcRoundItem, tFromContributor, _globalParams);
+            if (!check) break;
+          }
+          //Se tutti i controlli (1)(2)(3) passano il contributore viene messo nella lista dei contributori validi
+          if (check) verifiedContributorNameList.Add(bcRoundItem.contributorName);
+          Console.WriteLine($"Parte {bcRoundItem.contributorName} - Prova NIZK {((check) ? "valida" : "NON valida!")}");
+        }
+
+        return verifiedContributorNameList;
+      }
+
       /// <summary>
       /// verifica che le prove che accompagnano i parametri pubblici inviati dalle parti siano valide
       /// </summary>
       /// <param name="round"></param>
       /// <param name="bc"></param>
-      public static bool Verify(int round, int j, int[] rndBitArray, Blockchain_Item bcRoundItem, Fr t, GlobalParams globalParams)
+      public static bool VerifyProof(ulong round, int j, int[] rndBitArray, Blockchain_Item bcRoundItem, Fr t, GlobalParams globalParams)
       {
         Init(BLS12_381);
-        ETHmode();        
+        ETHmode();
         bool check = false;
         var proofToBeVerify = bcRoundItem.proof[j];
         //controllo (1) - VERIFICA DELLA CHIAVE PK DELLE PROVE
@@ -411,11 +424,11 @@ namespace TimeCryptor
       /// <param name="bc"></param>
       /// <param name="verifiedContributorNameList">Le parti per cui la prova NIZK è valida</param>
       /// <returns></returns>
-      public static Org.BouncyCastle.Math.EC.ECPoint Aggregate(int round, Blockchain bc, List<string> verifiedContributorNameList)
+      public static Org.BouncyCastle.Math.EC.ECPoint Aggregate(ulong round, List<string> verifiedContributorNameList)
       {
         Console.WriteLine("\n=== Calcolo di MPK_R - procedura di aggregazione delle chiavi parziali PK ===");
         // recupero solo gli item dei contributori onesti (la cui prova è corretta)
-        var bcRoundItemList = bc.Items.Where(s => s.round == round && verifiedContributorNameList.Contains(s.contributorName)).ToList();
+        var bcRoundItemList = _blockChain.Items.Where(s => s.round == round && verifiedContributorNameList.Contains(s.contributorName)).ToList();
         var i = 1;
         var MPK_R = bcRoundItemList[0].pp.PK;
         for (i = 1; i <= bcRoundItemList.Count - 1; i++)
@@ -437,13 +450,13 @@ namespace TimeCryptor
       /// <param name="ecParams"></param>
       /// <returns></returns>
       /// <exception cref="Exception"></exception>
-      public static BigInteger Invert(int round, G1 sigmaLOE, Blockchain bc, ECDomainParameters ecParams, List<string> verifiedContributorNameList)
+      public static BigInteger Invert(ulong round, G1 sigmaLOE, ECDomainParameters ecParams, List<string> verifiedContributorNameList)
       {
         Init(BLS12_381);
         ETHmode();
 
         //Recupero i parametri dalla blockChain
-        var contributorList = bc.Items.Where(s => s.round == round && verifiedContributorNameList.Contains(s.contributorName)).ToList();
+        var contributorList = _blockChain.Items.Where(s => s.round == round && verifiedContributorNameList.Contains(s.contributorName)).ToList();
         var array_sk = new BigInteger[contributorList.Count];
         var i = 0;
         foreach (var contributor in contributorList)
@@ -509,14 +522,14 @@ namespace TimeCryptor
       {
         return Items.Single(s => s.contributorName == cName);
       }
-      public List<Blockchain_Item> PopByRound(int round)
+      public List<Blockchain_Item> PopByRound(ulong round)
       {
         return Items.Where(s => s.round == round).ToList();
       }
     }
     public class Blockchain_Item
     {
-      public int round { get; set; }
+      public ulong round { get; set; }
       public string contributorName { get; set; }
       public PK_T_y_Item pp { get; set; }
       public Proof_ItemOnBlockchain[] proof { get; set; }

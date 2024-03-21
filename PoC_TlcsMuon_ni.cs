@@ -137,7 +137,7 @@ namespace TimeCryptor
     public class Contributor
     {
       private int k { get; set; }
-      private int Round { get; set; }
+      private ulong round { get; set; }
       public string Name { get; set; }
       public ECDomainParameters ecParams { get; set; }
       
@@ -150,14 +150,14 @@ namespace TimeCryptor
 
       public bool[] b { get; set; } // contenente l'array dei bit di casaulità per la verifica delle prove
       public Proof_Item[] proof { get; set; }
-      public Contributor(string contributorName, ECDomainParameters ecDomainParameters, int k, int round)
+      public Contributor(string contributorName, ECDomainParameters ecDomainParameters, int k, ulong round)
       {
         this.ecParams = ecDomainParameters;
         this.k = k;
-        this.Round = round;
+        this.round = round;
         this.Name = contributorName;
       }
-      public PK_T_y_ItemExtended GetPK_T_y(int round, G2 PKLOE, BigInteger sk)
+      public PK_T_y_ItemExtended GetPK_T_y(ulong round, G2 PKLOE, BigInteger sk)
       {
         Init(BLS12_381);
         ETHmode();
@@ -210,7 +210,7 @@ namespace TimeCryptor
       public void PublishToBlockchain(Blockchain bc, bool simulaContributoriNonOnesto = false)
       {
         var item = new Blockchain_Item();
-        item.round = this.Round;
+        item.round = this.round;
         item.pp = new PK_T_y_Item() { PK = this.PK, T = this.T, y = this.y };
         item.proof = new Proof_ItemOnBlockchain[this.k];
         for (int i = 0; i < this.k; i++)
@@ -245,7 +245,7 @@ namespace TimeCryptor
         bc.Put(item);
       }
 
-      public void SetPublicParams(int round, G2 PKLOE, GlobalParams globalParams)
+      public void SetPublicParams(ulong round, G2 PKLOE, GlobalParams globalParams)
       {
         Console.WriteLine($"\n=== Creazione parametri pubblici della Parte {this.Name} ===");
         //var array_b_string = "";
@@ -390,7 +390,7 @@ namespace TimeCryptor
       /// </summary>
       /// <param name="round"></param>
       /// <param name="bc"></param>
-      public static List<string> Verify(int round, Blockchain bc, GlobalParams globalParams)
+      public static List<string> Verify(ulong round, Blockchain bc, GlobalParams globalParams)
       {
         Init(BLS12_381);
         ETHmode();
@@ -470,7 +470,7 @@ namespace TimeCryptor
       /// <param name="bc"></param>
       /// <param name="verifiedContributorNameList">Le parti per cui la prova NIZK è valida</param>
       /// <returns></returns>
-      public static Org.BouncyCastle.Math.EC.ECPoint Aggregate(int round, Blockchain bc, List<string> verifiedContributorNameList)
+      public static Org.BouncyCastle.Math.EC.ECPoint Aggregate(ulong round, Blockchain bc, List<string> verifiedContributorNameList)
       {
         Console.WriteLine("\n=== CALCOLO DI MPK_R - AGGREGAZIONE DELLE CHIAVI PARZIALI DELLE PARTI ===");
         // recupero solo gli item dei contributori onesti (la cui prova è corretta)
@@ -496,7 +496,7 @@ namespace TimeCryptor
       /// <param name="ecParams"></param>
       /// <returns></returns>
       /// <exception cref="Exception"></exception>
-      public static BigInteger Invert(int round, G1 sigmaLOE, Blockchain bc, GlobalParams globalParams)
+      public static BigInteger Invert(ulong round, G1 sigmaLOE, Blockchain bc, GlobalParams globalParams)
       {
         Init(BLS12_381);
         ETHmode();
@@ -583,14 +583,14 @@ namespace TimeCryptor
       {
         return Items.Single(s => s.contributorName == cName);
       }
-      public List<Blockchain_Item> PopByRound(int round)
+      public List<Blockchain_Item> PopByRound(ulong round)
       {
         return Items.Where(s => s.round == round).ToList();
       }
     }
     public class Blockchain_Item
     {
-      public int round { get; set; }
+      public ulong round { get; set; }
       public string contributorName { get; set; }
       public PK_T_y_Item pp { get; set; }
       public Proof_ItemOnBlockchain[] proof { get; set; }

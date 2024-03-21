@@ -5,7 +5,7 @@
   }
   public class tlcskeypair
   {
-    public int round { get; set; }
+    public ulong round { get; set; }
     public int scheme { get; set; }
     public int pubkey_time { get; set; }
     public string public_key { get; set; }

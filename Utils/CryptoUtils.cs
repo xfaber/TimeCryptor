@@ -781,7 +781,7 @@ namespace TimeCryptor
       return retJsonObj;
     }
 
-    public static int TLCS_GetLatestLoeRound()
+    public static ulong TLCS_GetLatestLoeRound()
     {
       //RECUPERA L'ultimo ROUND DI LOE
       var url = $"https://api.drand.sh/52db9ba70e0cc0f6eaf7803dd07447a1f5477735fd3f661792ba94600c84e971/public/latest";
