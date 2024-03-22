@@ -10,14 +10,23 @@ namespace TimeCryptor
 {
   public static class PoC_TlcsMuon_i
   {
-    static LeagueOfEntropy _LOE = new LeagueOfEntropy();
-    static Blockchain _blockChain = new Blockchain();
-    static GlobalParams _globalParams = new GlobalParams();
-    static Contributor[] _contributors = null;
+    static LeagueOfEntropy _LOE;
+    static Blockchain _blockChain;
+    static GlobalParams _globalParams;
+    static Contributor[] _contributors;
 
     //Crea una coppia di chiavi per la curva ellittica scelta ed effettua una cifratura/decifratura di un messaggio con ECIES
     public static void Run_PoC()
     {
+      Init(BLS12_381);
+      ETHmode();
+      G1setDst("BLS_SIG_BLS12381G1_XMD:SHA-256_SSWU_RO_NUL_");
+
+      _LOE = new LeagueOfEntropy(LeagueOfEntropy.KeyModeEnum.FromWeb);
+      _blockChain = new Blockchain();
+      _globalParams = new GlobalParams();
+      _contributors = null;
+
       // LOE Round di riferimento
       //"round": 9792114,      
       //"randomness": "64ec4b3b2c4a16960e87e12a4c4df192d18d88a200e9e8478bb8a01e9f1d6c68", /* hash SHA256 del campo signature */
@@ -35,12 +44,11 @@ namespace TimeCryptor
       Console.WriteLine($"parametro di sicurezza k: {_globalParams.k}");
       Console.WriteLine($"Curva ellittica scelta: {_globalParams.ecCurveName}");
 
-      //IMPOSTO LA DATA FUTURA e RECUPERO IL NUMERO DI ROUND
-      //ulong round = 10750255;
-      var futureDateTime = DateTime.Now.AddSeconds(5);
+      //IMPOSTO LA DATA FUTURA e RECUPERO IL NUMERO DI ROUND      
+      var futureDateTime = DateTime.Now.AddSeconds(10); //blocco temporale 10 secondi
       ulong round = LeagueOfEntropy.GetRound(futureDateTime);
       Console.WriteLine($"Data futura impostata: {futureDateTime.ToString("dd/MM/yyyy HH:mm:ss")} round:{round}");
-      _LOE.CreateKeyPair(round);
+      _LOE.Round = round;
       _globalParams.PKLOE = (G2)_LOE.pk;
 
       //L'INSIEME DI PARTI GENERANO I PARAMETRI PUBBLICI E LI PUBBLICANO SULLA BLOCKCHAIN       
@@ -69,7 +77,6 @@ namespace TimeCryptor
       Console.WriteLine($"\n=== CIFRATURA CON LA CHIAVE MPK_R ===");
       //CARICA LA CHIAVE PUBBLICA DEL DESTINATARIO
       var publicKeyParameters = new ECPublicKeyParameters(MPK_R, _globalParams.ecParams);
-
       //GENERA LA COPPIA DI CHIAVI DEL MITTENTE
       var keyPairSender = ECIES.GenerateECIESKeyPair(_globalParams.ecParams);
       var message = "Hello TLE!";
@@ -80,13 +87,26 @@ namespace TimeCryptor
       Console.WriteLine($"Blocco temporale fino a : {futureDateTime.ToString("dd/MM/yyyy HH:mm:ss")}");
 
       Console.WriteLine("\n=== RECUPERO LA FIRMA LOE ===");
-      var sigmaLOE = _LOE.GetSigma(round);
+      
+      G1? sigmaLOE = null;
       //if (sigmaLOE == null)  { Console.WriteLine($"SIGMA LOE non ancora disponibile! Attendere fino a {LeagueOfEntropy.GetDateFromRound(round).ToString("dd/MM/yyyy HH:mm:ss")}"); }
       while (sigmaLOE == null)
       {
-        Console.WriteLine($"{DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss")} -> firma LOE non disponibile, attendo...");
-        Thread.Sleep(1000);
-        sigmaLOE = _LOE.GetSigma(round);
+        sigmaLOE = _LOE.sigma; //richiede la firma 
+        Console.WriteLine("...attendo...");
+        Thread.Sleep(2000);
+
+        /*
+        if (DateTime.Now >= LeagueOfEntropy.GetDateFromRound(round))
+        {
+          sigmaLOE = _LOE.sigma; //richiede la firma 
+        }
+        else
+        {
+          Console.WriteLine($"{DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss")} -> firma LOE non disponibile, attendo...");
+          Thread.Sleep(1000);
+        } 
+        */
       }
       Console.WriteLine("...FIRMA LOE DISPONIBILE!");
       Console.WriteLine($"{((G1)sigmaLOE).GetStr(16)}");
@@ -134,8 +154,8 @@ namespace TimeCryptor
     {
       public GlobalParams()
       {
-        Init(BLS12_381);
-        ETHmode();
+        //Init(BLS12_381);
+        //ETHmode();
         var g2Str16 = "1 0x24aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8 0x13e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e 0x0ce5d527727d6e118cc9cdc6da2e351aadfd9baa8cbdd3a76d429a695160d12c923ac9cc3baca289e193548608b82801 0x0606c4a02ea734cc32acd2b02bc28b99cb3e287e85a763af267492ab572e99ab3f370d275cec1da1aaa9075ff05f79be";
         var gen_g2 = new G2();
         gen_g2.SetStr(g2Str16, 16);
@@ -174,8 +194,8 @@ namespace TimeCryptor
 
       public PK_T_y_ItemExtended GetPK_T_y(ulong round, G2 PKLOE, BigInteger sk)
       {
-        Init(BLS12_381);
-        ETHmode();
+        //Init(BLS12_381);
+        //ETHmode();
 
         var PK = ecParams.G.Multiply(sk);
 
@@ -190,12 +210,9 @@ namespace TimeCryptor
                         //Console.WriteLine($"t: {t.GetStr(16).Print()}");
                         //Console.WriteLine($"T: {T.GetStr(16).Print()}");
 
-        //HashedRound=MAP_TO_POINT(SHA256(BIG_ENDIAN(round)))      
-        var bi_round = new BigInteger(round.ToString(), 10);
-        var bytes_Round = bi_round.ToByteArray();
-        var HC = new G1();
-        HC.HashAndMapTo(bytes_Round); //H1(C)
-
+        //HashedRound=MAP_TO_POINT(SHA256(BIG_ENDIAN(round)))
+        var HC = CryptoUtils.H1(round);
+        
         var Z = new GT();
         var e = new GT();
         e.Pairing(HC, PKLOE);   // e(H1(C),PKL)
@@ -290,8 +307,8 @@ namespace TimeCryptor
 
       public BigInteger GetPrivateKey(G1 sigmaLOE)
       {
-        Init(BLS12_381);
-        ETHmode();
+        //Init(BLS12_381);
+        //ETHmode();
 
         var Z = new GT();
         Z.Pairing(sigmaLOE, this.T); //Zi=e(sigmaR,Ti)
@@ -364,8 +381,8 @@ namespace TimeCryptor
       /// <param name="bc"></param>
       public static bool VerifyProof(ulong round, int j, int[] rndBitArray, Blockchain_Item bcRoundItem, Fr t, GlobalParams globalParams)
       {
-        Init(BLS12_381);
-        ETHmode();
+        //Init(BLS12_381);
+        //ETHmode();
         bool check = false;
         var proofToBeVerify = bcRoundItem.proof[j];
         //controllo (1) - VERIFICA DELLA CHIAVE PK DELLE PROVE
@@ -394,10 +411,7 @@ namespace TimeCryptor
 
         //controllo (3)
         //HashedRound=MAP_TO_POINT(SHA256(BIG_ENDIAN(round)))      
-        var bi_round = new BigInteger(round.ToString(), 10);
-        var bytes_Round = bi_round.ToByteArray();
-        var HC = new G1();
-        HC.HashAndMapTo(bytes_Round); //H1(C)
+        var HC = CryptoUtils.H1(round);
 
         var Z_temp = new GT();
         var e = new GT();
@@ -452,8 +466,9 @@ namespace TimeCryptor
       /// <exception cref="Exception"></exception>
       public static BigInteger Invert(ulong round, G1 sigmaLOE, ECDomainParameters ecParams, List<string> verifiedContributorNameList)
       {
-        Init(BLS12_381);
-        ETHmode();
+        //Init(BLS12_381);
+        //ETHmode();
+        //G1setDst("BLS_SIG_BLS12381G1_XMD:SHA-256_SSWU_RO_NUL_");
 
         //Recupero i parametri dalla blockChain
         var contributorList = _blockChain.Items.Where(s => s.round == round && verifiedContributorNameList.Contains(s.contributorName)).ToList();

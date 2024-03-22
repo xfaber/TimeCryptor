@@ -130,28 +130,14 @@ namespace TimeCryptor
     public static (G1 U, BigInteger V, BigInteger W) Encrypt_BLSonG2(ulong round, string PKLOEstring)
     {
       Init(BLS12_381);
-      //ETHmode();
-      /*
-      var SigLOEString = "9544ddce2fdbe8688d6f5b4f98eed5d63eee3902e7e162050ac0f45905a55657714880adabe3c3096b92767d886567d0";
-      var bytes_test = FromHexStr(SigLOEString);
-      var sha256_SigLOE = GetSHA256(bytes_test);
-      var bi_shatest = new BigInteger(sha256_SigLOE);
-      var sha256_SigLOEString = CryptoUtils.ConvertToBigInteger(bi_shatest).ToString("x2");
-      Console.WriteLine($"SHA256 {sha256_SigLOEString==randomness}");
-      */
-
-      //byte[] roundBytes = BitConverter.GetBytes(round);
-      //ulong roundBigEndian = BitConverter.ToInt32(BitConverter.GetBytes(round), 0);
-      //byte[] roundBigEndianBytes = BitConverter.GetBytes(roundBigEndian);
-      //if (BitConverter.IsLittleEndian) Array.Reverse(roundBigEndianBytes);
-
-      var bi_round = new BigInteger(round.ToString(), 10);
-      var bytes_Round = bi_round.ToByteArray();
-
-      mclBn_setMapToMode(MCL_MAP_TO_MODE_HASH_TO_CURVE);
+      ETHmode();
       G2setDst("BLS_SIG_BLS12381G2_XMD:SHA-256_SSWU_RO_NUL_");
+      
+      var rbytes_le = BitConverter.GetBytes(round);   //--> little-endian
+      var rbytes_be = rbytes_le.Reverse().ToArray();  //--> big-endian
+      var rHash = CryptoUtils.GetSHA256(rbytes_be);
       var HC = new G2();
-      HC.HashAndMapTo(GetSHA256(bytes_Round)); //H1(C)      
+      HC.HashAndMapTo(rHash); //H1(C)      
       Console.WriteLine($"HC: {HC.GetStr(16)}");
 
       mclBn_setETHserialization(1);
@@ -255,14 +241,8 @@ namespace TimeCryptor
       Console.WriteLine($"SHA256 {sha256_SigLOEString==randomness}");
       */
 
-
       //Calcola H1(Sha256(round)) appartiene a G1
-      var rbytes_le = BitConverter.GetBytes(round);   //--> little-endian
-      var rbytes_be = rbytes_le.Reverse().ToArray();  //--> big-endian
-      var rHash = CryptoUtils.GetSHA256(rbytes_be);
-      G1setDst("BLS_SIG_BLS12381G1_XMD:SHA-256_SSWU_RO_NUL_");
-      var HC = new G1();
-      HC.HashAndMapTo(rHash);
+      var HC = CryptoUtils.H1(round);
       Console.WriteLine($"HC: {HC.GetStr(16)}");
 
       // Carica P (chiave pubblica della rete drand di LOE)

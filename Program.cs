@@ -6,9 +6,12 @@
     {
       //PoC_RSW_Puzzle.Run_PoC();
 
-      PoC_Tlock.Run_PoC();
+      //PoC_Tlock.Run_PoC();
+      
+      //var LOE = new LeagueOfEntropy();
+      //var PK = LOE.GetPublicKey();
 
-      //PoC_TlcsMuon_i.Run_PoC();
+      PoC_TlcsMuon_i.Run_PoC();
       //PoC_TlcsMuon_ni.Run_PoC();
       //Test_TimelockZone.Run_Test_ValidationKeys();
 

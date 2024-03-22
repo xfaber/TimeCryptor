@@ -180,6 +180,22 @@ namespace TimeCryptor
   , prime256v1
     }
 
+    public static byte[] GetRoundHash(ulong round)
+    {
+      var rbytes_le = BitConverter.GetBytes(round);   //--> little-endian
+      var rbytes_be = rbytes_le.Reverse().ToArray();  //--> big-endian
+      var rHash = CryptoUtils.GetSHA256(rbytes_be);
+      return rHash;
+    }
+    public static G1 H1(ulong round)
+    {
+      var rHash = GetRoundHash(round);
+      var maptoPoint = new G1();
+      maptoPoint.HashAndMapTo(rHash);
+      //Console.WriteLine($"HC: {maptoPoint.GetStr(16)}");
+      return maptoPoint;
+    }    
+
     public static byte[] FromHexStr(string s)
     {
       if (s.Length % 2 == 1)

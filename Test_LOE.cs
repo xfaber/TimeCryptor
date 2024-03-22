@@ -27,11 +27,7 @@ namespace TimeCryptor
       var g2 = new G2(); //Zp
       g2.SetStr(g2Str, 16);
 
-      var rbytes_le = BitConverter.GetBytes(round);   //--> little-endian
-      var rbytes_be = rbytes_le.Reverse().ToArray();  //--> big-endian
-      var rHash = CryptoUtils.GetSHA256(rbytes_be);
-      var h = new G1();
-      h.HashAndMapTo(rHash);
+      var h = CryptoUtils.H1(round);
 
       var e1 = new GT();
       e1.Pairing(sigma, g2);
@@ -75,12 +71,7 @@ namespace TimeCryptor
       //var randomness = "4a8ff98e685c0acf9284b7226ffd740d0dc1be990a2e5fe4b51778ba2b2f6977"; //randomness =sha256(SigLOEString)
 
       //Calcolo l'hash 256 del round
-      var rbytes_le = BitConverter.GetBytes(round);   //--> little-endian
-      var rbytes_be = rbytes_le.Reverse().ToArray();  //--> big-endian
-      var rHash = CryptoUtils.GetSHA256(rbytes_be);
-
-      var HC = new G1();
-      HC.HashAndMapTo(rHash);
+      var HC = CryptoUtils.H1(round);
       Console.WriteLine($"HC: {HC.GetStr(16)}");
 
       var SigLOE = new G1();

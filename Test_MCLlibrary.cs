@@ -142,10 +142,7 @@ namespace TimeCryptor
       var g2 = new G2();
       g2.SetStr(g2Str, 16);
 
-      var bi_round = new BigInteger(round.ToString(), 10);
-      var bytes_Round = bi_round.ToByteArray();
-      var h = new G1();
-      h.HashAndMapTo(bytes_Round);
+      var h = CryptoUtils.H1(round);
 
       var e1 = new GT();
       e1.Pairing(sigma, g2);
@@ -197,10 +194,7 @@ namespace TimeCryptor
       pk.Mul(g2, sk);
 
       //firma il messaggio s = sk H(msg)
-      var bi_round = new BigInteger(round.ToString(), 10);
-      var bytes_Round = bi_round.ToByteArray();
-      var h = new G1();
-      h.HashAndMapTo(bytes_Round);
+      var h = CryptoUtils.H1(round);
       sigma = new G1();
       sigma.Mul(h, sk);
 
@@ -221,14 +215,15 @@ namespace TimeCryptor
       var round = LeagueOfEntropy.GetRound(futureDateTime);
       Console.WriteLine($"Data futura impostata: {futureDateTime.ToString("dd/MM/yyyy HH:mm:ss")} round:{round}");
 
-      var LOE = new LeagueOfEntropy();
-      LOE.CreateKeyPair(round);
-      var sigmaLOE = LOE.GetSigma(round);
+      var LOE = new LeagueOfEntropy(LeagueOfEntropy.KeyModeEnum.FromLocal);
+      LOE.Round = round;
+      LOE.Set_LOE_Data_FromLocal();
+      var sigmaLOE = LOE.sigma;
       while (sigmaLOE == null)
       {
         Console.WriteLine($"{DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss")} -> firma LOE non disponibile, attendo...");
         Thread.Sleep(1000);
-        sigmaLOE = LOE.GetSigma(round);
+        sigmaLOE = LOE.sigma;
       }
 
       var checkFirma = LeagueOfEntropy.checkFirma(round, (G1)sigmaLOE, (G2)LOE.pk);      
