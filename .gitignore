@@ -362,3 +362,5 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /docs
+/bin/Debug/net8.0/mclbn384_256.dll
+/bin/Debug/net8.0/mclshe384_256.dll
