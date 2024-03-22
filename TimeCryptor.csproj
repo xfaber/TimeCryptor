@@ -8,13 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="bin\Debug\net8.0\mclbn384_256.dll">
-      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
-    </None>
-    <None Include="bin\Debug\net8.0\mclshe384_256.dll" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="BouncyCastle.Cryptography" Version="2.3.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
@@ -30,5 +23,13 @@
       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="bin\Debug\net8.0\" />
+  </ItemGroup>
+
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="copy /Y &quot;$(SolutionDir)lib\mclbn384_256.dll&quot; &quot;$(TargetDir)&quot; &#xD;&#xA;copy /Y &quot;$(SolutionDir)lib\mclshe384_256.dll&quot; &quot;$(TargetDir)&quot; &#xD;&#xA;" />
+  </Target>
 
 </Project>

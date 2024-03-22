@@ -20,7 +20,8 @@ namespace TimeCryptor
     {
       Init(BLS12_381);
       ETHmode();
-      G1setDst("BLS_SIG_BLS12381G1_XMD:SHA-256_SSWU_RO_NUL_");
+      G1setDst("BLS_SIG_BLS12381G1_XMD:SHA-256_SSWU_RO_NUL_"); //DST
+
 
       _LOE = new LeagueOfEntropy(LeagueOfEntropy.KeyModeEnum.FromWeb);
       _blockChain = new Blockchain();
