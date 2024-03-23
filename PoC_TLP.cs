@@ -8,7 +8,7 @@ using TimeCryptor.Utils;
 
 namespace TimeCryptor
 {
-  public static class PoC_RSW_Puzzle
+  public static class PoC_TLP
   {
     public static void Run_PoC()
     {
@@ -41,7 +41,7 @@ namespace TimeCryptor
       Logger.Log($"Creazione time lock puzzle -INIZIO-");
       Stopwatch sw = new Stopwatch();
       sw.Start();
-      var puzzleParameters = RSW96_CreateTimeLockPuzzle(messaggio, keyString, tempo, quadratureParams.p, quadratureParams.q, quadratureParams.a, quadratureParams.quadratureAlSec, bitLengthPrimeNum);
+      var puzzleParameters = CreateTLP(messaggio, keyString, tempo, quadratureParams.p, quadratureParams.q, quadratureParams.a, quadratureParams.quadratureAlSec, bitLengthPrimeNum);
       sw.Stop();
       //Logger.Log($"Tempo per la creazione del puzzle: {sw.ElapsedMilliseconds} ms");
       Logger.Log($"n: -- prodotto dei due numeri primi p e q --"); puzzleParameters.n.Print();
@@ -64,9 +64,10 @@ namespace TimeCryptor
         Console.WriteLine($"---------------------------------------------------------------------------");
         Logger.Log($"Risoluzione time lock puzzle -INIZIO-");
         sw.Restart();
-        var ret = RSW96_ResolveTimeLockPuzzle(puzzleParameters);
+        var ret = ResolveTLP(puzzleParameters);
         sw.Stop();
         Logger.Log($"decryptedKey = keyString ? {((ret.decryptedKey == keyString) ? "OK" : ".......ERRORE!")}");
+        Logger.Log($"decryptedMessage = messaggio ? {((ret.decryptedMessage == messaggio) ? "OK" : ".......ERRORE!")}");
         Logger.Log($"Risoluzione time lock puzzle -FINE-");
         Console.WriteLine($"---------------------------------------------------------------------------");
         Logger.Log($"Tempo per la risoluzione del puzzle: {sw.ElapsedMilliseconds} ms ({sw.ElapsedMilliseconds / 1000} s)");
@@ -96,7 +97,7 @@ namespace TimeCryptor
                    Org.BouncyCastle.Math.BigInteger a, 
                    Org.BouncyCastle.Math.BigInteger t, 
                    Org.BouncyCastle.Math.BigInteger CK, string CM) 
-      RSW96_CreateTimeLockPuzzle(string messaggio, string keyString, int tempo, Org.BouncyCastle.Math.BigInteger p, Org.BouncyCastle.Math.BigInteger q, Org.BouncyCastle.Math.BigInteger a, Org.BouncyCastle.Math.BigInteger quadratureAlSec, int bitLengthPrimeNum = 1024)
+      CreateTLP(string messaggio, string keyString, int tempo, Org.BouncyCastle.Math.BigInteger p, Org.BouncyCastle.Math.BigInteger q, Org.BouncyCastle.Math.BigInteger a, Org.BouncyCastle.Math.BigInteger quadratureAlSec, int bitLengthPrimeNum = 1024)
     {
       // Supponiamo che Alice abbia un messaggio M
       // che vuole crittografare con un puzzle time-lock 
@@ -146,7 +147,7 @@ namespace TimeCryptor
     /// <param name="publicParams"></param>
     /// <returns></returns>
     public static (string decryptedKey, string decryptedMessage) 
-      RSW96_ResolveTimeLockPuzzle((Org.BouncyCastle.Math.BigInteger n, Org.BouncyCastle.Math.BigInteger a, Org.BouncyCastle.Math.BigInteger t, Org.BouncyCastle.Math.BigInteger CK, string CM) publicParams)
+      ResolveTLP((Org.BouncyCastle.Math.BigInteger n, Org.BouncyCastle.Math.BigInteger a, Org.BouncyCastle.Math.BigInteger t, Org.BouncyCastle.Math.BigInteger CK, string CM) publicParams)
     {
       // n = p*q
       // a = numero casuale 1<a<n
@@ -252,6 +253,5 @@ namespace TimeCryptor
 
       return (p, q, a, quadraturePerSecond);
     }
-
   }
 }

@@ -20,8 +20,8 @@ namespace TimeCryptor
     {
       Init(BLS12_381);
       ETHmode();
-      G1setDst("BLS_SIG_BLS12381G1_XMD:SHA-256_SSWU_RO_NUL_"); //DST
-
+      G1setDst("BLS_SIG_BLS12381G1_XMD:SHA-256_SSWU_RO_NUL_"); //DST da impostare in base alla chain drand da utilizzare 
+      //G1setDst("BLS_SIG_BLS12381G2_XMD:SHA-256_SSWU_RO_NUL_"); //su alcune chain (quelle non conformi a RFC drand viene usato erroneamente un DST sbagliato, refuso post switch G1<->G2
 
       _LOE = new LeagueOfEntropy(LeagueOfEntropy.KeyModeEnum.FromWeb);
       _blockChain = new Blockchain();
