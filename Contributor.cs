@@ -19,7 +19,7 @@ namespace TimeCryptor
     public G2 T { get; set; } //Hex string
     public BigInteger y { get; set; }
 
-    public bool[] b { get; set; } // contenente l'array dei bit di casaulità per la verifica delle prove
+    public int[] b { get; set; } // contenente l'array dei bit di casaulità per la verifica delle prove
     public Proof_Item[] proof { get; set; }
     public Contributor(string contributorName, ECDomainParameters ecDomainParameters, int k, ulong round)
     {
@@ -75,7 +75,7 @@ namespace TimeCryptor
       return (new PK_T_y_ItemExtended() { PK = PK, T = T, y = y, t = t });
     }
 
-    public void PublishToBlockchain(verifyMode vm, Blockchain bc, bool simulaContributoriNonOnesto = false)
+    public void PublishToBlockchain(verifyMode vm, Blockchain bc, bool bHonestParty = true)
     {
       var item = new Blockchain_Item();
       item.round = this.round;
@@ -94,17 +94,19 @@ namespace TimeCryptor
           //In base ai valori dell'arrtay di casualità b calcolato da Utils.GetRandomArrayForProof che implementa l'euristica di Fiat-Shamir
           switch (this.b[i])
           {
-            case false:
+            case 0:
               item.proof[i].left.t = this.proof[i].left.t;
               break;
-            default:
+            case 1:
               item.proof[i].right.t = this.proof[i].right.t;
               break;
+            default:
+              throw new Exception("value of b array invalid!");
           }
         }
       }
 
-      if (simulaContributoriNonOnesto)
+      if (!bHonestParty)
       { 
         var skField = ecParams.Curve.RandomFieldElement(new SecureRandom());
         var sk_X = skField.ToBigInteger();
@@ -117,7 +119,7 @@ namespace TimeCryptor
       Console.WriteLine($"\n=== Pubblicazione parametri della Parte {this.Name} sulla blockchain ===");
       
       Console.Write($"PK: {item.pp.PK.ToCompressedPoint()}");
-      if (simulaContributoriNonOnesto) Console.WriteLine($" <--- !!! Sostituzione con chiave pubblica malevola !!!"); else Console.WriteLine("");
+      if (!bHonestParty) Console.WriteLine($" <--- !!! Sostituzione con chiave pubblica malevola !!!"); else Console.WriteLine("");
       Console.WriteLine($"T: {item.pp.T.ToCompressedPoint()}");
       Console.WriteLine($"y: {item.pp.y.ToString(16)}");
       bc.Put(item);
@@ -187,7 +189,7 @@ namespace TimeCryptor
       return this.sk.Equals(skToCheck);
     }
 
-    public bool[] GetRandomArrayForProof(int k)
+    public int[] GetRandomArrayForProof(int k)
     {
       var array_b_string = "";
       array_b_string += this.PK.Normalize().ToCompressedPoint().ToLower();
@@ -204,10 +206,10 @@ namespace TimeCryptor
         bitString += Convert.ToString(byteArray[i], 2).PadLeft(8, '0');
         if (bitString.Length > k) break;
       }
-      var retArray = new bool[k];
+      var retArray = new int[k];
       for (int i = 0; i < k; i++)
       {
-        retArray[i] = (bitString[i] == '1') ? true : false;
+        retArray[i] = (bitString[i] == '1') ? 1 : 0;
       }
       return retArray;
     }
