@@ -2,7 +2,6 @@
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Math;
-using Org.BouncyCastle.Security;
 using System.Collections;
 using System.Drawing;
 using System.Runtime.CompilerServices;
@@ -11,7 +10,7 @@ using static mcl.MCL;
 
 namespace TimeCryptor
 {
-  public static class PoC_TlcsMuon_ni
+  public static partial class PoC_TlcsMuon_ni
   {
     static LeagueOfEntropy _LOE;
     static Blockchain _blockChain;
@@ -21,26 +20,24 @@ namespace TimeCryptor
     //Crea una coppia di chiavi per la curva ellittica scelta ed effettua una cifratura/decifratura di un messaggio con ECIES
     public static void Run_PoC()
     {
+      Console.WriteLine("======================================================");
+      Console.WriteLine("=== PoC === TLCS Muon - versione NON interattiva - ===");
+      Console.WriteLine("======================================================");
+
       Init(BLS12_381);
       ETHmode();
       G1setDst("BLS_SIG_BLS12381G1_XMD:SHA-256_SSWU_RO_NUL_");
+
       _LOE = new LeagueOfEntropy(LeagueOfEntropy.KeyModeEnum.FromWeb);
+
       _blockChain = new Blockchain();
-      _globalParams = new GlobalParams();
-      _contributors = null;
-
-
-      // LOE Round di riferimento
-      //"round": 9792114,      
-      //"randomness": "64ec4b3b2c4a16960e87e12a4c4df192d18d88a200e9e8478bb8a01e9f1d6c68", /* hash SHA256 del campo signature */
-      //"signature":"8440a7152497a74e806737e5614a957998f149d80fe342cb56d33339de045b9cf573216bd8916f8741a86f8bac20d1cb"
 
       //IMPOSTO LA CURVA ELLITTICA DA UTILIZZARE PER LA COPPIA DI CHIAVI DA GENERARE
-      _globalParams.ecCurveName = CryptoUtils.ECname.secp256k1.ToString();
-      //var ecParams = GetEcDomainParametersDirect(ecCurveName);
-      _globalParams.ecParams = CryptoUtils.GetEcDomainParametersByEcName(_globalParams.ecCurveName);
+      _globalParams = new GlobalParams(CryptoUtils.ECname.secp256k1);
       _globalParams.k = 3; //parametro di sicurezza per errore di solidità
       _globalParams.numeroContributori = 3;
+
+      _contributors = null;
 
       Console.WriteLine("\n=== CONFIGURAZIONI GENERALI ===");
       Console.WriteLine($"numeroContributori: {_globalParams.numeroContributori}");
@@ -60,10 +57,13 @@ namespace TimeCryptor
       for (int i = 1; i <= _globalParams.numeroContributori; i++)
       {
         var P = new Contributor($"P{i}", _globalParams.ecParams, _globalParams.k, round);
-        P.SetPublicParams(round, _globalParams.PKLOE, _globalParams);
+        P.SetPublicParams(round, _globalParams.PKLOE);
 
-        if (i == 2) P.PublishToBlockchain(_blockChain, true); //simula un contributo non onesto
-        else P.PublishToBlockchain(_blockChain);
+        //Crea l'array b dall'hash della stringa [〖PK,(〖PK〗_(j,b),T_(j,b),y_(j,b) )〗_(j∈[k],b∈{1,2} )]. 
+        P.b = P.GetRandomArrayForProof(_globalParams.k);
+
+        if (i == 2) P.PublishToBlockchain(verifyMode.NotInteractive, _blockChain, true); //simula un contributo non onesto
+        else P.PublishToBlockchain(verifyMode.NotInteractive, _blockChain);
         _contributors[i - 1] = P;
       }
 
@@ -93,7 +93,7 @@ namespace TimeCryptor
       var sigmaLOE = _LOE.sigma;
       //if (sigmaLOE == null)  { Console.WriteLine($"SIGMA LOE non ancora disponibile! Attendere fino a {LeagueOfEntropy.GetDateFromRound(round).ToString("dd/MM/yyyy HH:mm:ss")}"); }
       while (sigmaLOE == null)
-      { 
+      {
         Console.WriteLine($"{DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss")} -> firma LOE non disponibile, attendo...");
         Thread.Sleep(1000);
         sigmaLOE = _LOE.sigma;
@@ -101,10 +101,16 @@ namespace TimeCryptor
       Console.WriteLine("...FIRMA LOE DISPONIBILE!");
       Console.WriteLine($"{((G1)sigmaLOE).GetStr(16)}");
       Console.WriteLine($"sigmaLOE: {((G1)sigmaLOE).ToCompressedPoint()}");
-      
+
 
       //PROCEDURA DI INVERSIONE
       Console.WriteLine("\n=== INVERSIONE - CALCOLO DI sk_R ===");
+      
+      Console.Write("\n=== VERIFICA FIRMA LOE ===");
+      var checkFirmaLOE = LeagueOfEntropy.VerifySign(round, (G1)sigmaLOE, _globalParams.PKLOE);
+      if (!checkFirmaLOE) throw new Exception("Firma LOE non valida!");
+      else Console.Write("\nFirma LOE valida!\n\n");
+
       Console.WriteLine("\n=== Calcolo della sk_R - procedura di aggregazione delle chiavi segrete parziali sk della parti ===");
       var sk_R = SmartContract.Invert(round, (G1)sigmaLOE, _blockChain, _globalParams);
       Console.WriteLine($"sk_R: {sk_R.ToString(16)}");
@@ -124,272 +130,24 @@ namespace TimeCryptor
       var plainText = ECIES.Decrypt(cipherText, keyPairSender.Public, privateKeyParameters);
       Console.WriteLine($"Testo decifrato: {plainText}");
     }
-    public class GlobalParams
-    {
-      public GlobalParams()
-      {
-        //Init(BLS12_381);
-        //ETHmode();
-        var g2Str16 = "1 0x24aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8 0x13e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e 0x0ce5d527727d6e118cc9cdc6da2e351aadfd9baa8cbdd3a76d429a695160d12c923ac9cc3baca289e193548608b82801 0x0606c4a02ea734cc32acd2b02bc28b99cb3e287e85a763af267492ab572e99ab3f370d275cec1da1aaa9075ff05f79be";
-        var gen_g2 = new G2();
-        gen_g2.SetStr(g2Str16, 16);
-        g2 = gen_g2;
-      }
-      public string ecCurveName { get; set; }
-      public ECDomainParameters ecParams { get; set; }
-      public int k { get; set; } //parametro di sicurezza per errore di solidità
-      public int numeroContributori { get; set; }
-      public G2 g2 { get; set; }
-      public G2 PKLOE { get; set; }
-    }
-    public class Contributor
-    {
-      private int k { get; set; }
-      private ulong round { get; set; }
-      public string Name { get; set; }
-      public ECDomainParameters ecParams { get; set; }
-      
-      private BigInteger sk { get; set; }
-      //public Fr t { get; set; }
-      
-      public Org.BouncyCastle.Math.EC.ECPoint PK { get; set; }
-      public G2 T { get; set; } //Hex string
-      public BigInteger y { get; set; }
-
-      public bool[] b { get; set; } // contenente l'array dei bit di casaulità per la verifica delle prove
-      public Proof_Item[] proof { get; set; }
-      public Contributor(string contributorName, ECDomainParameters ecDomainParameters, int k, ulong round)
-      {
-        this.ecParams = ecDomainParameters;
-        this.k = k;
-        this.round = round;
-        this.Name = contributorName;
-      }
-      public PK_T_y_ItemExtended GetPK_T_y(ulong round, G2 PKLOE, BigInteger sk)
-      {
-        //Init(BLS12_381);
-        //ETHmode();
-
-        var PK = ecParams.G.Multiply(sk);
-
-        var g2Str16 = "1 0x24aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8 0x13e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e 0x0ce5d527727d6e118cc9cdc6da2e351aadfd9baa8cbdd3a76d429a695160d12c923ac9cc3baca289e193548608b82801 0x0606c4a02ea734cc32acd2b02bc28b99cb3e287e85a763af267492ab572e99ab3f370d275cec1da1aaa9075ff05f79be";
-        var g2 = new G2(); //Zp
-        var T = new G2();
-        var t = new Fr();
-        t.SetByCSPRNG(); //sceglie ti casuale da Zp      
-        g2.SetStr(g2Str16, 16);
-        T.Mul(g2, t);   //Ti=g2^ti
-                        //Console.WriteLine($"g2: {g2.GetStr(16).Print()}");
-                        //Console.WriteLine($"t: {t.GetStr(16).Print()}");
-                        //Console.WriteLine($"T: {T.GetStr(16).Print()}");
-
-        //HashedRound=MAP_TO_POINT(SHA256(BIG_ENDIAN(round)))      
-        var HC = CryptoUtils.H1(round);
-
-        var Z = new GT();
-        var e = new GT();
-        e.Pairing(HC, PKLOE);   // e(H1(C),PKL)
-        Z.Pow(e, t);            // Zi = e(H1(C),PKL)^ti
-        if (!Z.IsValid()) throw new Exception("Z not valid!");
-        //Console.WriteLine($"Z: {Z.GetStr(16).Print()}");
-
-        byte[] Zbytes = Z.Serialize();
-        byte[] HashZ = CryptoUtils.GetSHA256(Zbytes); // H(Zi)
-                                                      //Console.WriteLine($"Hash Z - SHA256: {BitConverter.ToString(HashZ).Replace("-","")}");
-
-        var ZBigInt = new BigInteger(HashZ);
-        var y = ZBigInt.Xor(sk);     //H(Zi) XOR ski
-
-        //elimino dalla memoria i valori privati
-        Z.Clear();
-        //t.Clear(); //commentato perchè verrà cancellato quando si pubblica la tupla (PK,T,y) sulla blockchain
-        sk = null;
-
-        //Console.WriteLine($"PK: {this.PK}");
-        //Console.WriteLine($"T: {T.GetStr(16)}");
-        //Console.WriteLine($"y: {y.ToString(16)}");
-        //ritorno i valori pubblici
-        return (new PK_T_y_ItemExtended() { PK = PK, T = T, y = y, t = t });
-      }
-
-      public void PublishToBlockchain(Blockchain bc, bool simulaContributoriNonOnesto = false)
-      {
-        var item = new Blockchain_Item();
-        item.round = this.round;
-        item.pp = new PK_T_y_Item() { PK = this.PK, T = this.T, y = this.y };
-        item.proof = new Proof_ItemOnBlockchain[this.k];
-        for (int i = 0; i < this.k; i++)
-        {
-          item.proof[i] = new Proof_ItemOnBlockchain();
-          item.proof[i].left = new PK_T_y_ItemExtended() { PK = this.proof[i].left.PK, T = this.proof[i].left.T, y = this.proof[i].left.y };
-          item.proof[i].right = new PK_T_y_ItemExtended() { PK = this.proof[i].right.PK, T = this.proof[i].right.T, y = this.proof[i].right.y };
-
-          //In base ai valori dell'arrtay di casualità b calcolato da Utils.GetRandomArrayForProof che implementa l'euristica di Fiat-Shamir
-          switch (this.b[i])
-          {
-            case false:
-              item.proof[i].left.t = this.proof[i].left.t;
-              break;
-            default:
-              item.proof[i].right.t = this.proof[i].right.t;
-              break;
-          }
-        }
-
-        if (simulaContributoriNonOnesto)
-        {
-          Console.WriteLine($"\n=== Creazione chiave pubblica malevola della Parte {this.Name} ===");
-          var skField = ecParams.Curve.RandomFieldElement(new SecureRandom());
-          var sk_X = skField.ToBigInteger();
-          var PK_X = ecParams.G.Multiply(sk_X);
-          if (!PK_X.IsValid()) throw new Exception("PK_X not valid!");
-          item.pp.PK = PK_X;
-        }
-
-        item.contributorName = this.Name;
-        bc.Put(item);
-      }
-
-      public void SetPublicParams(ulong round, G2 PKLOE, GlobalParams globalParams)
-      {
-        Console.WriteLine($"\n=== Creazione parametri pubblici della Parte {this.Name} ===");
-        //var array_b_string = "";
-        
-        var skField = ecParams.Curve.RandomFieldElement(new SecureRandom());
-        var sk = skField.ToBigInteger();
-        this.sk = sk;
-        var PK = ecParams.G.Multiply(sk);
-        if (!PK.IsValid()) throw new Exception("PK not valid!");
-        
-        //CREA la lista delle tuple (〖PK〗_(j,b),T_(j,b),y_(j,b) )_(j∈[k],b∈{1,2} )
-        var pp = GetPK_T_y(round, PKLOE, sk);
-        //imposto i valori pubblici      
-        this.PK = pp.PK;
-        this.T = pp.T;
-        this.y = pp.y;
-        Console.WriteLine($"PK: {this.PK.ToCompressedPoint()}");
-        Console.WriteLine($"T: {this.T.ToCompressedPoint()}");
-        Console.WriteLine($"y: {this.y.ToString(16)}");
-                
-        //array_b_string += this.PK.Normalize().ToCompressedPoint();
-
-        this.proof = new Proof_Item[this.k];
-        for (int j = 0; j < this.k; j++)
-        {
-          var array_sk = new BigInteger[2];
-          array_sk[0] = sk;
-          skField = ecParams.Curve.RandomFieldElement(new SecureRandom());
-          array_sk[0] = skField.ToBigInteger();
-          while (array_sk[0].CompareTo(sk) >= 0)
-          {
-            var bitshift = CryptoUtils.GetSecureRandomNumberFromBC(BigInteger.One, new BigInteger(sk.BitLength.ToString(), 10)).IntValue;
-            array_sk[0] = array_sk[0].ShiftRight(bitshift);
-          }
-          array_sk[1] = sk.Subtract(array_sk[0]);
-          this.proof[j] = new Proof_Item();
-          this.proof[j].left = GetPK_T_y(round, PKLOE, array_sk[0]);
-          this.proof[j].right = GetPK_T_y(round, PKLOE, array_sk[1]);
-
-          //array_b_string += this.proof[j].left.PK.Normalize().ToCompressedPoint() + this.proof[j].left.T.GetStr(16) + this.proof[j].left.y;
-          //array_b_string += this.proof[j].right.PK.Normalize().ToCompressedPoint() + this.proof[j].right.T.GetStr(16) + this.proof[j].right.y;
-        }
-
-        //Crea l'array b come hash della stringa [〖PK,(〖PK〗_(j,b),T_(j,b),y_(j,b) )〗_(j∈[k],b∈{1,2} )]. 
-        this.b = Utils.GetRandomArrayForProof(this, globalParams.k);
-      }
-      public BigInteger GetPrivateKey(G1 sigmaLOE)
-      {
-        //Init(BLS12_381);
-        //ETHmode();
-
-        var Z = new GT();
-        Z.Pairing(sigmaLOE, this.T); //Zi=e(sigmaR,Ti)
-        if (!Z.IsValid()) throw new Exception("Zi not valid!");
-        //Console.WriteLine($"Z: {Z.GetStr(16).Print()}");
-
-        var Zbytes = Z.Serialize();
-        var hashZ = CryptoUtils.GetSHA256(Zbytes); //H(Zi)
-                                                   //Console.WriteLine($"Hash Z - SHA256: {BitConverter.ToString(hashZ).Replace("-", "")}");
-        var ZBigInt = new BigInteger(hashZ);
-        var sk = this.y.Xor(ZBigInt);
-        Console.WriteLine($"sk (tlcs): {sk.ToString(16)} (chiave segreta ricostruita)");
-        Console.WriteLine($"=============================");
-
-        return sk;
-      }
-      public bool CheckSK(BigInteger skToCheck)
-      {
-        return this.sk.Equals(skToCheck);
-      }
-    }
-    public static class Utils
-    {
-      public static BigInteger getSk(PK_T_y_ItemExtended tupleToBeVerify, G1 sigmaLOE)
-      {
-        var Zjb = new GT();
-        Zjb.Pairing(sigmaLOE, tupleToBeVerify.T); //Zi=e(sigmaR,Tjb)
-        if (!Zjb.IsValid()) throw new Exception("Zi not valid!");
-        
-        var Zjbbytes = Zjb.Serialize();
-        var hashZjb = CryptoUtils.GetSHA256(Zjbbytes); //H(Zi)
-                                                       
-        var ZjbBigInt = new BigInteger(hashZjb);
-        var skjb = tupleToBeVerify.y.Xor(ZjbBigInt);
-
-        return skjb;
-      }
-      public static bool[] GetRandomArrayForProof(Contributor contributor, int k)
-      {
-        var array_b_string = "";
-        array_b_string += contributor.PK.Normalize().ToCompressedPoint().ToLower();
-        for (int j = 0; j < k; j++)
-        {
-          array_b_string += contributor.proof[j].left.PK.Normalize().ToCompressedPoint().ToLower() + contributor.proof[j].left.T.GetStr(16) + contributor.proof[j].left.y;
-          array_b_string += contributor.proof[j].right.PK.Normalize().ToCompressedPoint().ToLower() + contributor.proof[j].right.T.GetStr(16) + contributor.proof[j].right.y;
-        }
-
-        var byteArray = CryptoUtils.GetSHA256(System.Text.Encoding.UTF8.GetBytes(array_b_string));
-        var bitString = "";
-        for (int i = 0; i < byteArray.Length; i++)
-        {
-          bitString += Convert.ToString(byteArray[i], 2).PadLeft(8, '0');
-          if (bitString.Length > k) break;
-        }
-        var retArray = new bool[k];
-        for (int i = 0; i < k; i++)
-        {
-          retArray[i] = (bitString[i] == '1') ? true : false;
-        }
-        return retArray;
-      }
-
-      public static bool[] GetRandomArrayForProof(Blockchain_Item bcItem, int k)
-      {
-        var array_b_string = "";
-        array_b_string += bcItem.pp.PK.Normalize().ToCompressedPoint().ToLower();
-        for (int j = 0; j < k; j++)
-        {
-          array_b_string += bcItem.proof[j].left.PK.Normalize().ToCompressedPoint().ToLower() + bcItem.proof[j].left.T.GetStr(16) + bcItem.proof[j].left.y;
-          array_b_string += bcItem.proof[j].right.PK.Normalize().ToCompressedPoint().ToLower() + bcItem.proof[j].right.T.GetStr(16) + bcItem.proof[j].right.y;
-        }
-
-        var byteArray = CryptoUtils.GetSHA256(System.Text.Encoding.UTF8.GetBytes(array_b_string));
-        var bitString = "";
-        for (int i = 0; i < byteArray.Length; i++)
-        {
-          bitString += Convert.ToString(byteArray[i], 2).PadLeft(8, '0');
-          if (bitString.Length > k) break;
-        }
-        var retArray = new bool[k];
-        for (int i = 0; i < k; i++)
-        {
-          retArray[i] = (bitString[i] == '1') ? true : false;
-        }
-        return retArray;
-      }
-    }
+  
     public static class SmartContract
     {
+      public static int[] ChooseRandomBitArray(int k)
+      {
+        //Il verifier sceglie un array di k bit casuali (usando gli interi 0 e 1)
+        var b = new int[k];
+        Random r = new Random();
+        while (b.Any(item => item == 1) == false)
+        {
+          for (int i = 0; i < b.Length; i++)
+          {
+            b[i] = r.Next(0, 2);
+          }
+        }
+        return b;
+      }
+
       /// <summary>
       /// verifica che le prove che accompagnano i parametri pubblici inviati dalle parti siano valide
       /// </summary>
@@ -397,17 +155,13 @@ namespace TimeCryptor
       /// <param name="bc"></param>
       public static List<string> Verify(ulong round, Blockchain bc, GlobalParams globalParams)
       {
-        //Init(BLS12_381);
-        //ETHmode();
-
-        var retVerifiedContributors = new List<string>(); //lista dei contributiori validi, per cui la verifica delle prove h adato esito positivo
-        
+        //lista dei contributiori validi, per cui la verifica delle prove h adato esito positivo
+        var verifiedContributorNameList = new List<string>(); 
         //Recupera i dati dei parametri pubblici pubblicati dai contributori sulla blockchain 
         var bcRoundItemList = bc.PopByRound(round);
-
         foreach (var bcRoundItem in bcRoundItemList)
-        { 
-          var b = Utils.GetRandomArrayForProof(bcRoundItem, globalParams.k);
+        {
+          var b = GetRandomArrayForProof(bcRoundItem, globalParams.k);
 
           var check = false;
           for (int j = 0; j < globalParams.k; j++)
@@ -416,53 +170,67 @@ namespace TimeCryptor
             var PKj_sum = bcRoundItem.proof[j].left.PK.Add(bcRoundItem.proof[j].right.PK);
             check = bcRoundItem.pp.PK.Equals(PKj_sum);
             if (!check) break;
-            
-            PK_T_y_ItemExtended proofToBeVerify = null;
+
+            PK_T_y_ItemExtended tupleToBeVerify = null;
             switch (b[j])
             {
               case false:
-                proofToBeVerify = bcRoundItem.proof[j].left;                
+                tupleToBeVerify = bcRoundItem.proof[j].left;
                 break;
               case true:
-                proofToBeVerify = bcRoundItem.proof[j].right;                
+                tupleToBeVerify = bcRoundItem.proof[j].right;
                 break;
               default:
                 throw new Exception("b array contain invalid values!");
             }
 
-            //controllo (2) - VERIFICA dei T attraverso in base al vettore di bit di casualita scelto dal verifier
-            var T_temp = new G2();
-            T_temp.Mul(globalParams.g2, proofToBeVerify.t);   //Ti=g2^ti
-            check = proofToBeVerify.T.Equals(T_temp);
-            if (!check) break;
-
-            //controllo (3)
-            //HashedRound=MAP_TO_POINT(SHA256(BIG_ENDIAN(round)))      
-            var HC = CryptoUtils.H1(round);
-
-            var Z_temp = new GT();
-            var e = new GT();
-            e.Pairing(HC, globalParams.PKLOE);   // e(H1(C),PKL)
-            Z_temp.Pow(e, proofToBeVerify.t);            // Zi = e(H1(C),PKL)^ti
-            if (!Z_temp.IsValid()) throw new Exception("Z_temp not valid!");
-
-            byte[] Zbytes = Z_temp.Serialize();
-            byte[] HashZ = CryptoUtils.GetSHA256(Zbytes); // H(Zi)                                                 
-
-            var ZBigInt = new BigInteger(HashZ);
-            var sk = ZBigInt.Xor(proofToBeVerify.y);     //H(Zi) XOR y
-
-            var PK_temp = globalParams.ecParams.G.Multiply(sk);
-            check = proofToBeVerify.PK.Equals(PK_temp);             //g^(〖sk〗_(j,b_j)^' )==〖PK〗_(j,b_j )
+            check = SmartContract.VerifyTupleProof(round, tupleToBeVerify, _globalParams);
             if (!check) break;
           }
 
           //Se tutti i controlli (1)(2)(3) passano il contributore viene messo nella lista dei contributori validi
-          if (check) retVerifiedContributors.Add(bcRoundItem.contributorName);
-          Console.WriteLine($"Parte {bcRoundItem.contributorName} - Prova NIZK {((check) ? "valida" : "NON valida!")}");
+          if (check) verifiedContributorNameList.Add(bcRoundItem.contributorName);
+          Console.WriteLine($"Parte {bcRoundItem.contributorName} - Prova {((check) ? "valida" : "NON valida!")}");
         }
-        Console.WriteLine($"Parti valide {retVerifiedContributors.Count}/{globalParams.numeroContributori}");
-        return retVerifiedContributors;
+        Console.WriteLine($"Parti valide {verifiedContributorNameList.Count}/{globalParams.numeroContributori}");
+        return verifiedContributorNameList;
+      }
+
+      /// <summary>
+      /// verifica che le prove che accompagnano i parametri pubblici inviati dalle parti siano valide
+      /// </summary>
+      /// <param name="round"></param>
+      /// <param name="bc"></param>
+      public static bool VerifyTupleProof(ulong round, PK_T_y_ItemExtended tupleToBeVerify, GlobalParams globalParams)
+      {
+        bool check = false;
+
+        //controllo (2) - VERIFICA dei T in base al vettore di bit di casualita scelto dal verifier
+        var T_temp = new G2();
+        T_temp.Mul(globalParams.g2, tupleToBeVerify.t);   //Ti=g2^ti
+        check = tupleToBeVerify.T.Equals(T_temp);
+        if (!check) return false;
+
+        //controllo (3)
+        //HashedRound=MAP_TO_POINT(SHA256(BIG_ENDIAN(round)))      
+        var HC = CryptoUtils.H1(round);
+
+        var Z_temp = new GT();
+        var e = new GT();
+        e.Pairing(HC, globalParams.PKLOE);   // e(H1(C),PKL)
+        Z_temp.Pow(e, tupleToBeVerify.t);            // Zi = e(H1(C),PKL)^ti
+        if (!Z_temp.IsValid()) throw new Exception("Z_temp not valid!");
+
+        byte[] Zbytes = Z_temp.Serialize();
+        byte[] HashZ = CryptoUtils.GetSHA256(Zbytes); // H(Zi)                                                 
+
+        var ZBigInt = new BigInteger(HashZ);
+        var sk = ZBigInt.Xor(tupleToBeVerify.y);     //H(Zi) XOR y
+
+        var PK_temp = globalParams.ecParams.G.Multiply(sk);
+        check = tupleToBeVerify.PK.Equals(PK_temp);             //g^(〖sk〗_(j,b_j)^' )==〖PK〗_(j,b_j )
+
+        return check;
       }
 
       /// <summary>
@@ -470,7 +238,7 @@ namespace TimeCryptor
       /// </summary>
       /// <param name="round"></param>
       /// <param name="bc"></param>
-      /// <param name="verifiedContributorNameList">Le parti per cui la prova NIZK è valida</param>
+      /// <param name="verifiedContributorNameList">Le parti per cui la prova è valida</param>
       /// <returns></returns>
       public static Org.BouncyCastle.Math.EC.ECPoint Aggregate(ulong round, Blockchain bc, List<string> verifiedContributorNameList)
       {
@@ -499,28 +267,20 @@ namespace TimeCryptor
       /// <returns></returns>
       /// <exception cref="Exception"></exception>
       public static BigInteger Invert(ulong round, G1 sigmaLOE, Blockchain bc, GlobalParams globalParams)
-      {
-        //Init(BLS12_381);
-        //ETHmode();
-
-        Console.Write("\n=== VERIFICA FIRMA LOE ===");
-        var checkFirmaLOE = LeagueOfEntropy.checkFirma(round, sigmaLOE, globalParams.PKLOE);
-        if (!checkFirmaLOE) throw new Exception("Firma LOE non valida!");
-        else Console.Write("\nFirma LOE valida!\n\n");
-
+      { 
         //Recupero i parametri dalla blockChain
         var bcRoundItemList = bc.Items.Where(s => s.round == round).ToList();
         var array_sk = new BigInteger[bcRoundItemList.Count];
         var i = 0;
         foreach (var bcRoundItem in bcRoundItemList)
         {
-          Console.WriteLine($"\n=== RICOSTRUZIONE CHIAVE PARAZIALE PARTE {bcRoundItem.contributorName} ===");
+          Console.WriteLine($"\n=== RICOSTRUZIONE CHIAVE SEGRETA PARZIALE PARTE {bcRoundItem.contributorName} ===");
           var check = false;
           for (int j = 0; j < globalParams.k; j++)
           {
-            var sk1 = Utils.getSk(bcRoundItem.proof[j].left,sigmaLOE);
+            var sk1 = GetSk(bcRoundItem.proof[j].left, sigmaLOE);
             var PK1_temp = globalParams.ecParams.G.Multiply(sk1);
-            var sk2 = Utils.getSk(bcRoundItem.proof[j].right, sigmaLOE);
+            var sk2 = GetSk(bcRoundItem.proof[j].right, sigmaLOE);
             var PK2_temp = globalParams.ecParams.G.Multiply(sk2);
             var checkPK = PK1_temp.Equals(bcRoundItem.proof[j].left.PK) && PK2_temp.Equals(bcRoundItem.proof[j].right.PK);
 
@@ -530,12 +290,12 @@ namespace TimeCryptor
             var skj = sk1.Add(sk2).Mod(globalParams.ecParams.N);
             CryptoUtils.CheckValidKeyPair(bcRoundItem.pp.PK, skj, globalParams.ecParams); //verifica la validita della coppia di chiavi generate per il round
             if (checkPK && checkPKsum)
-            { 
-              Console.WriteLine($"{bcRoundItem.contributorName} sk (tlcs): {skj.ToString(16).ToLower()} (chiave segreta ricostruita)");              
+            {
+              Console.WriteLine($"{bcRoundItem.contributorName} sk (tlcs): {skj.ToString(16).ToLower()} (chiave segreta ricostruita)");
               array_sk[i++] = skj;
               check = true;
               break;
-            } 
+            }
           }
           if (!(check)) Console.WriteLine($"{bcRoundItem.contributorName} sk (tlcs): (chiave segreta NON valida!)");
         }
@@ -545,57 +305,48 @@ namespace TimeCryptor
         var sk_r = array_sk[0];
         for (i = 1; i <= array_sk.Length - 1; i++)
         {
-          if (array_sk[i]!=null) sk_r = sk_r.Add(array_sk[i]).Mod(globalParams.ecParams.N);
+          if (array_sk[i] != null) sk_r = sk_r.Add(array_sk[i]).Mod(globalParams.ecParams.N);
         }
         return sk_r;
       }
-    }
-    public class PK_T_y_Item
-    {
-      public Org.BouncyCastle.Math.EC.ECPoint PK { get; set; }
-      public G2 T { get; set; }
-      public BigInteger y { get; set; }
-    }
-    public class PK_T_y_ItemExtended : PK_T_y_Item
-    {
-      public Fr t { get; set; } //da usare solo nelle proof e deve essere cancellato dalal tupla pubblicata sulla blockchain
-    }
-    public class Proof_Item
-    {
-      public PK_T_y_ItemExtended left { get; set; } //0
-      public PK_T_y_ItemExtended right { get; set; } //1
-    }
-    public class Proof_ItemOnBlockchain
-    {
-      public PK_T_y_ItemExtended left { get; set; } //0
-      public PK_T_y_ItemExtended right { get; set; } //1
-    }
-    public class Blockchain
-    {
-      public List<Blockchain_Item> Items = null;
-      public Blockchain()
+      public static BigInteger GetSk(PK_T_y_ItemExtended tupleToBeVerify, G1 sigmaLOE)
       {
-        Items = new List<Blockchain_Item>();
+        var Zjb = new GT();
+        Zjb.Pairing(sigmaLOE, tupleToBeVerify.T); //Zi=e(sigmaR,Tjb)
+        if (!Zjb.IsValid()) throw new Exception("Zi not valid!");
+
+        var Zjbbytes = Zjb.Serialize();
+        var hashZjb = CryptoUtils.GetSHA256(Zjbbytes); //H(Zi)
+
+        var ZjbBigInt = new BigInteger(hashZjb);
+        var skjb = tupleToBeVerify.y.Xor(ZjbBigInt);
+
+        return skjb;
       }
-      public void Put(Blockchain_Item item)
+      public static bool[] GetRandomArrayForProof(Blockchain_Item bcItem, int k)
       {
-        Items.Add(item);
+        var array_b_string = "";
+        array_b_string += bcItem.pp.PK.Normalize().ToCompressedPoint().ToLower();
+        for (int j = 0; j < k; j++)
+        {
+          array_b_string += bcItem.proof[j].left.PK.Normalize().ToCompressedPoint().ToLower() + bcItem.proof[j].left.T.GetStr(16) + bcItem.proof[j].left.y;
+          array_b_string += bcItem.proof[j].right.PK.Normalize().ToCompressedPoint().ToLower() + bcItem.proof[j].right.T.GetStr(16) + bcItem.proof[j].right.y;
+        }
+
+        var byteArray = CryptoUtils.GetSHA256(System.Text.Encoding.UTF8.GetBytes(array_b_string));
+        var bitString = "";
+        for (int i = 0; i < byteArray.Length; i++)
+        {
+          bitString += Convert.ToString(byteArray[i], 2).PadLeft(8, '0');
+          if (bitString.Length > k) break;
+        }
+        var retArray = new bool[k];
+        for (int i = 0; i < k; i++)
+        {
+          retArray[i] = (bitString[i] == '1') ? true : false;
+        }
+        return retArray;
       }
-      public Blockchain_Item PopByContributorName(string cName)
-      {
-        return Items.Single(s => s.contributorName == cName);
-      }
-      public List<Blockchain_Item> PopByRound(ulong round)
-      {
-        return Items.Where(s => s.round == round).ToList();
-      }
-    }
-    public class Blockchain_Item
-    {
-      public ulong round { get; set; }
-      public string contributorName { get; set; }
-      public PK_T_y_Item pp { get; set; }
-      public Proof_ItemOnBlockchain[] proof { get; set; }
     }
   }
 }

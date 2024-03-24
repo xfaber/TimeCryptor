@@ -226,7 +226,7 @@ namespace TimeCryptor
         sigmaLOE = LOE.sigma;
       }
 
-      var checkFirma = LeagueOfEntropy.checkFirma(round, (G1)sigmaLOE, (G2)LOE.pk);      
+      var checkFirma = LeagueOfEntropy.VerifySign(round, (G1)sigmaLOE, (G2)LOE.pk);      
       Console.Write($"Firma LOE {(checkFirma?"valida":"NON valida")}");
 
       var sigmaLOE2 = new G1();

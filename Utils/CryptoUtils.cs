@@ -12,8 +12,11 @@ using Org.BouncyCastle.Math;
 using Org.BouncyCastle.Math.EC;
 using Org.BouncyCastle.Security;
 using Org.BouncyCastle.Utilities.Encoders;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Diagnostics;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -23,8 +26,6 @@ using BigInteger = System.Numerics.BigInteger;
 
 namespace TimeCryptor
 {
-
-
   /// <summary>
   /// Parametri della curv aBaby Jub Jub in forma Montgomery
   /// </summary>
@@ -124,60 +125,89 @@ namespace TimeCryptor
 
     #region Curve ellittiche
 
+    public static string Description(this Enum enumValue) //, Type enumType
+    {
+      string description = "";
+      //MemberInfo info = enumType.GetMember(enumValue.ToString()).First();
+      FieldInfo info = enumValue.GetType().GetField(enumValue.ToString());
+
+      if (info != null && info.CustomAttributes.Any())
+      {
+        DescriptionAttribute nameAttr = info.GetCustomAttribute<DescriptionAttribute>();
+        description = nameAttr != null ? nameAttr.Description : enumValue.ToString();
+      }
+      else
+      {
+        description = enumValue.ToString();
+      }
+      return description;
+    }
+
     public enum ECname
     {
       FRP256v1
-  , brainpoolp160r1
-  , brainpoolp160t1
-  , brainpoolp192r1
-  , brainpoolp192t1
-  , brainpoolp224r1
-  , brainpoolp224t1
-  , brainpoolp256r1
-  , brainpoolp256t1
-  , brainpoolp320r1
-  , brainpoolp320t1
-  , brainpoolp384r1
-  , brainpoolp384t1
-  , brainpoolp512r1
-  , brainpoolp512t1
-  /*
-  , GostR3410-2001-CryptoPro-A]
-  , GostR3410-2001-CryptoPro-B
-  , GostR3410-2001-CryptoPro-C
-  , tc26-gost-3410-2012-256paramSetA
-  , tc26-gost-3410-12-512paramSetA
-  , tc26-gost-3410-12-512paramSetB
-  , tc26_gost_3410_12_512_paramSetC
-  , P-192
-  , P-224
-  , P-256
-  , P-384
-  , P-521
-  */
-  , secp112r1
-  , secp112r2
-  , secp128r1
-  , secp128r2
-  , secp160k1
-  , secp160r1
-  , secp160r2
-  , secp192k1
-  , secp192r1
-  , secp224k1
-  , secp224r1
-  , secp256k1
-  , secp256r1
-  , secp384r1
-  , secp521r1
-  , sm2p256v1
-  , prime192v1
-  , prime192v2
-  , prime192v3
-  , prime239v1
-  , prime239v2
-  , prime239v3
-  , prime256v1
+      , brainpoolp160r1
+      , brainpoolp160t1
+      , brainpoolp192r1
+      , brainpoolp192t1
+      , brainpoolp224r1
+      , brainpoolp224t1
+      , brainpoolp256r1
+      , brainpoolp256t1
+      , brainpoolp320r1
+      , brainpoolp320t1
+      , brainpoolp384r1
+      , brainpoolp384t1
+      , brainpoolp512r1
+      , brainpoolp512t1
+      , [Description("GostR3410-2001-CryptoPro-A")]
+      GostR3410_2001_CryptoPro_A
+      , [Description("GostR3410-2001-CryptoPro-B")]
+      GostR3410_2001_CryptoPro_B
+      , [Description("GostR3410-2001-CryptoPro-C")]
+      GostR3410_2001_CryptoPro_C
+      , [Description("tc26-gost-3410-2012-256paramSetA")]
+      tc26_gost_3410_2012_256paramSetA
+      , [Description("tc26-gost-3410-12-512paramSetA")]
+      tc26_gost_3410_12_512paramSetA
+      , [Description("tc26-gost-3410-12-512paramSetB")]
+      tc26_gost_3410_12_512paramSetB
+      , [Description("tc26_gost_3410_12_512_paramSetC")]
+      tc26_gost_3410_12_512_paramSetC
+      , [Description("P-192")]
+      P_192
+      , [Description("P-224")]
+      P_224
+      , [Description("P-256")]
+      P_256
+      , [Description("P-384")]
+      P_384
+      , [Description("P-521")]
+      P521
+      , secp112r1
+      , secp112r2
+      , secp128r1
+      , secp128r2
+      , secp160k1
+      , secp160r1
+      , secp160r2
+      , secp192k1
+      , secp192r1
+      , secp224k1
+      , secp224r1
+      , secp256k1
+      , secp256r1
+      , secp384r1
+      , secp521r1
+      , sm2p256v1
+      , prime192v1
+      , prime192v2
+      , prime192v3
+      , prime239v1
+      , prime239v2
+      , prime239v3
+      , prime256v1
+      , BabyJubjub
     }
 
     public static byte[] GetRoundHash(ulong round)
@@ -194,7 +224,7 @@ namespace TimeCryptor
       maptoPoint.HashAndMapTo(rHash);
       //Console.WriteLine($"HC: {maptoPoint.GetStr(16)}");
       return maptoPoint;
-    }    
+    }
 
     public static byte[] FromHexStr(string s)
     {
@@ -219,6 +249,11 @@ namespace TimeCryptor
                        .ToArray();
     }
 
+    /// <summary>
+    /// i parametri della curva ellittica vengono gestiti dirrettamnete dalla libreria BouncyCastle
+    /// </summary>
+    /// <param name="curveName"></param>
+    /// <returns></returns>
     public static ECDomainParameters GetEcDomainParametersByEcName(string curveName)
     {
       X9ECParameters ecParams = ECNamedCurveTable.GetByName(curveName);
@@ -226,10 +261,10 @@ namespace TimeCryptor
     }
 
     /// <summary>
-    /// parametri curva impostati manualmente
+    /// i parametri della curva ellittica vengono impostati manualmente
     /// </summary>
     /// <returns></returns>
-    public static ECDomainParameters ecDomainParametersDirect(string curveName)
+    public static ECDomainParameters GetEcDomainParametersByCustomData(string curveName)
     {
       /*
        p è il numero primo usato per generare GF(p), 

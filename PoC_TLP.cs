@@ -12,6 +12,10 @@ namespace TimeCryptor
   {
     public static void Run_PoC()
     {
+      Console.WriteLine("=================================");
+      Console.WriteLine("=== PoC === TIME LOCK PUZZLES ===");
+      Console.WriteLine("=================================");
+
       // 11/11/2023 --> Impostantdo una lunghezza in bit dei numeri primi scelti a 4096 il tempo di creazione del puzzle supera il tempo di risoluzione
       var bitLengthPrimeNum = 1024;                               // lunghezza in bit dei numeri primi scelti    
 

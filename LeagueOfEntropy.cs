@@ -56,7 +56,7 @@ namespace TimeCryptor
 
     public string DrandNetworkHash { get; }
 
-    public static bool checkFirma(ulong round, G1 sigma, G2 pk)
+    public static bool VerifySign(ulong round, G1 sigma, G2 pk)
     {
       //Init(BLS12_381);
       //ETHmode();
@@ -157,7 +157,7 @@ namespace TimeCryptor
       {
         var sig = new G1();
         sig.Deserialize(CryptoUtils.FromHexStr(drandBeaconObj.signature));
-        var check = checkFirma(this.Round, sig, (G2)this.pk);
+        var check = VerifySign(this.Round, sig, (G2)this.pk);
         this.sigma = sig;
       }
       else

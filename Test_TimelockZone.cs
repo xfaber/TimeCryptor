@@ -77,7 +77,7 @@ namespace TimeCryptor
 
         // if (!string.IsNullOrEmpty(kp.PublicKeyHexW)) var (x, y) = CryptoUtils.DecompressWeierStrassBjjKey(kp.PublicKeyHexW);
 
-        var ecParameters = CryptoUtils.ecDomainParametersDirect(kp.Curve.ToString());
+        var ecParameters = CryptoUtils.GetEcDomainParametersByCustomData(kp.Curve.ToString());
 
         var isOriginalPkPointDecompressed = false;
         if (kp.PublicKeyHex.Substring(2, 2) == "04") isOriginalPkPointDecompressed = true;
