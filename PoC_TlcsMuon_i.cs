@@ -23,6 +23,8 @@ namespace TimeCryptor
       Console.WriteLine("=== PoC === TLCS Muon - versione interattiva - ===");
       Console.WriteLine("==================================================");
 
+      #region CONFIGURAZIONI GENERALI
+      Console.WriteLine("\n=== CONFIGURAZIONI GENERALI ===");
       Init(BLS12_381);
       ETHmode();
       G1setDst("BLS_SIG_BLS12381G1_XMD:SHA-256_SSWU_RO_NUL_"); //DST da impostare in base alla chain drand da utilizzare 
@@ -31,29 +33,29 @@ namespace TimeCryptor
       _LOE = new LeagueOfEntropy(LeagueOfEntropy.KeyModeEnum.FromLocal);
 
       _blockChain = new Blockchain();
-      
 
       //IMPOSTO LA CURVA ELLITTICA DA UTILIZZARE PER LA COPPIA DI CHIAVI DA GENERARE      
       _globalParams = new GlobalParams(CryptoUtils.ECname.secp256k1);
       _globalParams.k = 2; //parametro di sicurezza per errore di solidità
       _globalParams.numeroContributori = 3;
       _contributors = null;
-
-      Console.WriteLine("\n=== CONFIGURAZIONI GENERALI ===");
+      
       Console.WriteLine($"numeroContributori: {_globalParams.numeroContributori}");
       Console.WriteLine($"parametro di sicurezza k: {_globalParams.k}");
       Console.WriteLine($"Curva ellittica scelta: {_globalParams.ecCurveName}");
+      #endregion
 
-      //IMPOSTO LA DATA FUTURA e RECUPERO IL NUMERO DI ROUND      
+      # region IMPOSTAZIONE DATA FUTURA e RECUPERO IL NUMERO DI ROUND      
       var futureDateTime = DateTime.Now.AddSeconds(10); //blocco temporale 10 secondi
       ulong round = LeagueOfEntropy.GetRound(futureDateTime);
       Console.WriteLine($"Data futura impostata: {futureDateTime.ToString("dd/MM/yyyy HH:mm:ss")} round:{round}");
       _LOE.Round = round;
       _globalParams.PKLOE = (G2)_LOE.pk;
+      #endregion
 
-      //L'INSIEME DELLE PARTI GENERANO I PARAMETRI PUBBLICI E LI PUBBLICANO SULLA BLOCKCHAIN       
-      _contributors = new Contributor[_globalParams.numeroContributori];
+      #region GENERAZIONE PARAMETRI PUBBLICI E PUBBLICAZIONE SULLA BLOCKCHAIN
       Console.WriteLine("\n=== GENERAZIONE PARAMETRI PUBBLICI E PUBBLICAZIONE SULLA BLOCKCHAIN ===");
+      _contributors = new Contributor[_globalParams.numeroContributori];      
       for (int i = 1; i <= _globalParams.numeroContributori; i++)
       {
         var P = new Contributor($"P{i}", _globalParams.ecParams, _globalParams.k, round);
@@ -64,18 +66,21 @@ namespace TimeCryptor
         P.PublishToBlockchain(verifyMode.Interactive, _blockChain, bHonestParty);
         _contributors[i - 1] = P;
       }
+      #endregion
 
-      //PROCEDURA DI VERIFICA DELLE PROVE 
+      #region VERIFICA DELLE PROVE
       Console.WriteLine("\n=== VERIFICA DELLE PROVE ===");
       IContributorsService servizio = new ContributorsService(_contributors);
       _smartContract = new SmartContract(servizio);
-      var verifiedContributorNameList = _smartContract.Verify(verifyMode.Interactive, round, _blockChain, _globalParams);      
+      var verifiedContributorNameList = _smartContract.Verify(verifyMode.Interactive, round, _blockChain, _globalParams);
+      #endregion
 
-      //PROCEDURA DI AGGREGAZIONE
+      #region AGGREGAZIONE - CALCOLO MPK_R
       Console.WriteLine("\n=== AGGREGAZIONE - CALCOLO MPK_R ===");
       var MPK_R = _smartContract.Aggregate(round, _blockChain, verifiedContributorNameList);
+      #endregion
 
-      //ENCRYPT            
+      #region CIFRATURA
       Console.WriteLine($"\n=== CIFRATURA CON LA CHIAVE MPK_R ===");
       //CARICA LA CHIAVE PUBBLICA DEL DESTINATARIO
       var publicKeyParameters = new ECPublicKeyParameters(MPK_R, _globalParams.ecParams);
@@ -87,7 +92,9 @@ namespace TimeCryptor
       Console.WriteLine($"Testo originale: {message}");
       Console.WriteLine($"Testo cifrato: {cipherTextString}");
       Console.WriteLine($"Blocco temporale fino a : {futureDateTime.ToString("dd/MM/yyyy HH:mm:ss")}");
+      #endregion
 
+      #region RECUPERO LA FIRMA LOE
       Console.WriteLine("\n=== RECUPERO LA FIRMA LOE ===");
       G1? sigmaLOE = null;
       //if (sigmaLOE == null)  { Console.WriteLine($"SIGMA LOE non ancora disponibile! Attendere fino a {LeagueOfEntropy.GetDateFromRound(round).ToString("dd/MM/yyyy HH:mm:ss")}"); }
@@ -111,16 +118,17 @@ namespace TimeCryptor
       }
       Console.WriteLine("...FIRMA LOE DISPONIBILE!");
       Console.WriteLine($"{((G1)sigmaLOE).GetStr(16)}");
+      #endregion
 
-      //PROCEDURA DI INVERSIONE
+      #region INVERSIONE - CALCOLO DI sk_R
       Console.WriteLine("\n=== INVERSIONE - CALCOLO DI sk_R ===");
       Console.WriteLine("\n=== Calcolo della sk_R - procedura di aggregazione delle chiavi segrete parziali sk della parti ===");
-      //var sk_R = SmartContract.Invert_simple(round, (G1)sigmaLOE, _globalParams.ecParams, verifiedContributorNameList);
       var sk_R = _smartContract.Invert(round, (G1)sigmaLOE, _blockChain, _globalParams);
       Console.WriteLine($"sk_R: {sk_R.ToString(16)}");
       CryptoUtils.CheckValidKeyPair(MPK_R, sk_R, _globalParams.ecParams);
+      #endregion
 
-      //DECRYPT
+      #region DECIFRATURA
       Console.WriteLine($"\n=== DECIFRATURA CON LA CHIAVE sk_R ===");
       //chiave privata del destinatario
       var privateKeyParameters = new ECPrivateKeyParameters(sk_R, _globalParams.ecParams);
@@ -130,9 +138,10 @@ namespace TimeCryptor
       //byte[] serializedPrivateBytes = privateKeyInfo.ToAsn1Object().GetDerEncoded();
       //string serializedPrivate = Convert.ToBase64String(serializedPrivateBytes);
       //Console.WriteLine($"sk: {serializedPrivate}");
-
+      
       var plainText = ECIES.Decrypt(cipherText, keyPairSender.Public, privateKeyParameters);
       Console.WriteLine($"Testo decifrato: {plainText}");
+      #endregion
     }
   }
 }

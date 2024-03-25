@@ -9,10 +9,6 @@ using static mcl.MCL;
 
 namespace TimeCryptor
 {
-  
-  
-  
-
   public static class PoC_TlcsMuon_ni
   {
     static LeagueOfEntropy _LOE;

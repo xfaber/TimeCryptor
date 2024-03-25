@@ -16,12 +16,13 @@ namespace TimeCryptor
       Console.WriteLine("=== PoC === TIME LOCK PUZZLES ===");
       Console.WriteLine("=================================");
 
-      // 11/11/2023 --> Impostantdo una lunghezza in bit dei numeri primi scelti a 4096 il tempo di creazione del puzzle supera il tempo di risoluzione
+      // 11/11/2023 --> Impostando una lunghezza in bit dei numeri primi scelti a 4096 il tempo di creazione del puzzle supera il tempo di risoluzione
       var bitLengthPrimeNum = 1024;                               // lunghezza in bit dei numeri primi scelti    
 
       // numero di quadrature al secondo del risolutore (che decifra il messagio)
       var numQuadrature = new Org.BouncyCastle.Math.BigInteger("300000");
       var quadratureParams = GetSquarePerSecond(numQuadrature, bitLengthPrimeNum);
+      //var quadratureParams = GetSquarePerSecond2(numQuadrature, bitLengthPrimeNum);
       //  45454 con 2048 bit                           
       // 200000 con 1024 bit
 
@@ -45,7 +46,7 @@ namespace TimeCryptor
       Logger.Log($"Creazione time lock puzzle -INIZIO-");
       Stopwatch sw = new Stopwatch();
       sw.Start();
-      var puzzleParameters = CreateTLP(messaggio, keyString, tempo, quadratureParams.p, quadratureParams.q, quadratureParams.a, quadratureParams.quadratureAlSec, bitLengthPrimeNum);
+      var puzzleParameters = CreateTLP(messaggio, keyString, tempo, quadratureParams.p, quadratureParams.q, quadratureParams.a, quadratureParams.quadratureAlSec);
       sw.Stop();
       //Logger.Log($"Tempo per la creazione del puzzle: {sw.ElapsedMilliseconds} ms");
       Logger.Log($"n: -- prodotto dei due numeri primi p e q --"); puzzleParameters.n.Print();
@@ -100,8 +101,15 @@ namespace TimeCryptor
     public static (Org.BouncyCastle.Math.BigInteger n, 
                    Org.BouncyCastle.Math.BigInteger a, 
                    Org.BouncyCastle.Math.BigInteger t, 
-                   Org.BouncyCastle.Math.BigInteger CK, string CM) 
-      CreateTLP(string messaggio, string keyString, int tempo, Org.BouncyCastle.Math.BigInteger p, Org.BouncyCastle.Math.BigInteger q, Org.BouncyCastle.Math.BigInteger a, Org.BouncyCastle.Math.BigInteger quadratureAlSec, int bitLengthPrimeNum = 1024)
+                   Org.BouncyCastle.Math.BigInteger CK, 
+                   string CM) 
+      CreateTLP(string messaggio,  
+                string keyString, 
+                int tempo, 
+                Org.BouncyCastle.Math.BigInteger p, 
+                Org.BouncyCastle.Math.BigInteger q, 
+                Org.BouncyCastle.Math.BigInteger a, 
+                Org.BouncyCastle.Math.BigInteger quadratureAlSec)
     {
       // Supponiamo che Alice abbia un messaggio M
       // che vuole crittografare con un puzzle time-lock 
@@ -150,8 +158,7 @@ namespace TimeCryptor
     /// </summary>
     /// <param name="publicParams"></param>
     /// <returns></returns>
-    public static (string decryptedKey, string decryptedMessage) 
-      ResolveTLP((Org.BouncyCastle.Math.BigInteger n, Org.BouncyCastle.Math.BigInteger a, Org.BouncyCastle.Math.BigInteger t, Org.BouncyCastle.Math.BigInteger CK, string CM) publicParams)
+    public static (string decryptedKey, string decryptedMessage) ResolveTLP((Org.BouncyCastle.Math.BigInteger n, Org.BouncyCastle.Math.BigInteger a, Org.BouncyCastle.Math.BigInteger t, Org.BouncyCastle.Math.BigInteger CK, string CM) publicParams)
     {
       // n = p*q
       // a = numero casuale 1<a<n
@@ -257,5 +264,43 @@ namespace TimeCryptor
 
       return (p, q, a, quadraturePerSecond);
     }
+
+
+    public static (Org.BouncyCastle.Math.BigInteger p,
+      Org.BouncyCastle.Math.BigInteger q,
+      Org.BouncyCastle.Math.BigInteger a,
+      Org.BouncyCastle.Math.BigInteger quadratureAlSec)
+      GetSquarePerSecond2(Org.BouncyCastle.Math.BigInteger numeroQuadrature, int bitLengthPrimeNum)
+    {
+      //Dati recuperati dal calcolo del numero di quadrature in base al tasso di cresscita dalal procedura di Rivest per il calcolo delle quadrature di TLP35 (1999)
+      var secondsPerYear = new Org.BouncyCastle.Math.BigInteger("31536000",10);
+      var squaringsInYear2024 = new Org.BouncyCastle.Math.BigInteger("3407624672177", 10);
+      var quadraturePerSecond = squaringsInYear2024.Divide(secondsPerYear);
+
+      //Dati recuperati dal calcolo del numero di quadrature in base al tasso di cresscita dalal procedura di Rivest per il calcolo delle quadrature di TLP35 (2019)
+      //var secondsPerYear = new Org.BouncyCastle.Math.BigInteger("31536000", 10);
+      //var squaringsInYear2024 = new Org.BouncyCastle.Math.BigInteger("1127554845855", 10);
+      //var quadraturePerSecond = squaringsInYear2024.Divide(secondsPerYear);
+
+
+      var p = CryptoUtils.GetRandomPrimeNumber(bitLengthPrimeNum);
+      var q = CryptoUtils.GetRandomPrimeNumber(bitLengthPrimeNum);
+      var n = p.Multiply(q);
+      var a = Org.BouncyCastle.Math.BigInteger.Two; // GetSecureRandomNumberFromBC(Org.BouncyCastle.Math.BigInteger.One, n);
+
+      //Logger.Log($"p: "); p.Print();
+      //Logger.Log($"q: "); q.Print();
+      //Logger.Log($"n: "); n.Print();
+      //Logger.Log($"a: ",false);a.Print();
+
+
+      Console.WriteLine($"---------------------------------------------------------------------------");
+      Logger.Log($"Numero quadrature per secondo per questa macchina: {quadraturePerSecond}");
+
+      //Logger.Log($"b: "); b.Print();
+
+      return (p, q, a, quadraturePerSecond);
+    }
+    
   }
 }
