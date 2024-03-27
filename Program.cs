@@ -4,13 +4,13 @@
   {
     static void Main(string[] args)
     {
-      PoC_TLP.Run_PoC();            //Esegue il protocollo TLP
+      //PoC_TLP.Run_PoC();            //Esegue il protocollo TLP
 
       //PoC_Tlock.Run_PoC();          //Esegue il protocollo Tlock
 
       //PoC_TlcsMuon_i.Run_PoC();       //Esegue il protocollo TLCS Muon in versione interattiva
 
-      //PoC_TlcsMuon_ni.Run_PoC();    //Esegue il protocollo TLCS Muon in versione NON interattiva
+      PoC_TlcsMuon_ni.Run_PoC();    //Esegue il protocollo TLCS Muon in versione NON interattiva
 
       //TEST VARI
 

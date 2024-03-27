@@ -28,17 +28,15 @@ namespace TimeCryptor
       Init(BLS12_381);
       ETHmode();
       G1setDst("BLS_SIG_BLS12381G1_XMD:SHA-256_SSWU_RO_NUL_"); //DST da impostare in base alla chain drand da utilizzare 
-      //G1setDst("BLS_SIG_BLS12381G2_XMD:SHA-256_SSWU_RO_NUL_"); //su alcune chain (quelle non conformi a RFC drand viene usato erroneamente un DST sbagliato, refuso post switch G1<->G2
+      //G1setDst("BLS_SIG_BLS12381G2_XMD:SHA-256_SSWU_RO_NUL_"); //su alcune chain (quelle non conformi a RFC rfc9380) viene usato erroneamente un DST sbagliato, refuso post switch G1<->G2
 
       _LOE = new LeagueOfEntropy(LeagueOfEntropy.KeyModeEnum.FromLocal);
-
       _blockChain = new Blockchain();
 
       //IMPOSTO LA CURVA ELLITTICA DA UTILIZZARE PER LA COPPIA DI CHIAVI DA GENERARE      
       _globalParams = new GlobalParams(CryptoUtils.ECname.secp256k1);
-      _globalParams.k = 2; //parametro di sicurezza per errore di solidità
+      _globalParams.k = 80; //parametro di sicurezza per errore di solidità
       _globalParams.numeroContributori = 3;
-      _contributors = null;
       
       Console.WriteLine($"numeroContributori: {_globalParams.numeroContributori}");
       Console.WriteLine($"parametro di sicurezza k: {_globalParams.k}");
