@@ -13,13 +13,10 @@ namespace TimeCryptor
     public ECDomainParameters ecParams { get; set; }
 
     private BigInteger sk { get; set; }
-    //public Fr t { get; set; }
-
-    public Org.BouncyCastle.Math.EC.ECPoint PK { get; set; }
-    public G2 T { get; set; } //Hex string
-    public BigInteger y { get; set; }
-
-    public int[] b { get; set; } // contenente l'array dei bit di casaulità per la verifica delle prove
+        
+    public PK_T_y_Item pp { get; set; }
+    
+    public int[] b { get; set; } // contenente l'array dei bit di casualità per la verifica delle prove
     public Proof_Item[] proof { get; set; }
     public Contributor(string contributorName, ECDomainParameters ecDomainParameters, int k, ulong round)
     {
@@ -28,11 +25,9 @@ namespace TimeCryptor
       this.round = round;
       this.Name = contributorName;
     }
+    
     public PK_T_y_ItemExtended GetPK_T_y(ulong round, G2 PKLOE, BigInteger sk)
     {
-      //Init(BLS12_381);
-      //ETHmode();
-
       var PK = ecParams.G.Multiply(sk);
 
       var g2Str16 = "1 0x24aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8 0x13e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e 0x0ce5d527727d6e118cc9cdc6da2e351aadfd9baa8cbdd3a76d429a695160d12c923ac9cc3baca289e193548608b82801 0x0606c4a02ea734cc32acd2b02bc28b99cb3e287e85a763af267492ab572e99ab3f370d275cec1da1aaa9075ff05f79be";
@@ -42,9 +37,9 @@ namespace TimeCryptor
       t.SetByCSPRNG(); //sceglie ti casuale da Zp      
       g2.SetStr(g2Str16, 16);
       T.Mul(g2, t);   //Ti=g2^ti
-                      //Console.WriteLine($"g2: {g2.GetStr(16).Print()}");
-                      //Console.WriteLine($"t: {t.GetStr(16).Print()}");
-                      //Console.WriteLine($"T: {T.GetStr(16).Print()}");
+      //Console.WriteLine($"g2: {g2.GetStr(16).Print()}");
+      //Console.WriteLine($"t: {t.GetStr(16).Print()}");
+      //Console.WriteLine($"T: {T.GetStr(16).Print()}");
 
       //HashedRound=MAP_TO_POINT(SHA256(BIG_ENDIAN(round)))      
       var HC = CryptoUtils.H1(round);
@@ -79,7 +74,7 @@ namespace TimeCryptor
     {
       var item = new Blockchain_Item();
       item.round = this.round;
-      item.pp = new PK_T_y_Item() { PK = this.PK, T = this.T, y = this.y };
+      item.pp = new PK_T_y_Item() { PK = this.pp.PK, T = this.pp.T, y = this.pp.y };
       item.proof = new Proof_Item[this.k];
       for (int i = 0; i < this.k; i++)
       {
@@ -91,7 +86,7 @@ namespace TimeCryptor
         // perchè i valori casuali dell'array b vengono determinati dalla funzione hash che fa da oracolo
         if (vm == verifyMode.NotInteractive)
         {
-          //In base ai valori dell'arrtay di casualità b calcolato da Utils.GetRandomArrayForProof che implementa l'euristica di Fiat-Shamir
+          //In base ai valori dell'array di casualità b calcolato da Utils.GetRandomArrayForProof che implementa l'euristica di Fiat-Shamir
           switch (this.b[i])
           {
             case 0:
@@ -106,6 +101,7 @@ namespace TimeCryptor
         }
       }
 
+      // Il valore del flag permette di simulare il comportamento di una parte disonesta, che pubblica sulla blockchian una chiave non valida.
       if (!bHonestParty)
       { 
         var skField = ecParams.Curve.RandomFieldElement(new SecureRandom());
@@ -130,28 +126,29 @@ namespace TimeCryptor
       Console.WriteLine($"\n=== Creazione parametri pubblici della Parte {this.Name} ===");
       //var array_b_string = "";
 
-      var skField = ecParams.Curve.RandomFieldElement(new SecureRandom());
+      var skField = ecParams.Curve.RandomFieldElement(new SecureRandom()); //sceglie una sk casuale dal gruppo della curva ellittica scelta
       var sk = skField.ToBigInteger();
       this.sk = sk;
-      var PK = ecParams.G.Multiply(sk);
+      var PK = ecParams.G.Multiply(sk);                                   //calcola la chiave PK corrispondente
       if (!PK.IsValid()) throw new Exception("PK not valid!");
 
       //CREA la lista delle tuple (〖PK〗_(j,b),T_(j,b),y_(j,b) )_(j∈[k],b∈{1,2} )
-      var pp = GetPK_T_y(round, PKLOE, sk);
-      //imposto i valori pubblici      
-      this.PK = pp.PK;
-      this.T = pp.T;
-      this.y = pp.y;
-      Console.WriteLine($"PK: {this.PK.ToCompressedPoint()}");
-      Console.WriteLine($"T: {this.T.ToCompressedPoint()}");
-      Console.WriteLine($"y: {this.y.ToString(16)}");
+      var publicParams = GetPK_T_y(round, PKLOE, sk); // calcola i parametri pubblici
+      //imposta i valori pubblici      
+      this.pp = new PK_T_y_Item();
+      this.pp.PK = publicParams.PK;
+      this.pp.T = publicParams.T;
+      this.pp.y = publicParams.y;
+      Console.WriteLine($"PK: {this.pp.PK.ToCompressedPoint()}");
+      Console.WriteLine($"T: {this.pp.T.ToCompressedPoint()}");
+      Console.WriteLine($"y: {this.pp.y.ToString(16)}");
 
       this.proof = new Proof_Item[this.k];
       for (int j = 0; j < this.k; j++)
       {
         var array_sk = new BigInteger[2];
         array_sk[0] = sk;
-        skField = ecParams.Curve.RandomFieldElement(new SecureRandom());
+        skField = ecParams.Curve.RandomFieldElement(new SecureRandom()); //sceglie un numero casuale
         array_sk[0] = skField.ToBigInteger();
         while (array_sk[0].CompareTo(sk) >= 0)
         {
@@ -164,35 +161,11 @@ namespace TimeCryptor
         this.proof[j].right = GetPK_T_y(round, PKLOE, array_sk[1]);
       }
     }
-    public BigInteger GetPrivateKey(G1 sigmaLOE)
-    {
-      //Init(BLS12_381);
-      //ETHmode();
-
-      var Z = new GT();
-      Z.Pairing(sigmaLOE, this.T); //Zi=e(sigmaR,Ti)
-      if (!Z.IsValid()) throw new Exception("Zi not valid!");
-      //Console.WriteLine($"Z: {Z.GetStr(16).Print()}");
-
-      var Zbytes = Z.Serialize();
-      var hashZ = CryptoUtils.GetSHA256(Zbytes); //H(Zi)
-                                                 //Console.WriteLine($"Hash Z - SHA256: {BitConverter.ToString(hashZ).Replace("-", "")}");
-      var ZBigInt = new BigInteger(hashZ);
-      var sk = this.y.Xor(ZBigInt);
-      Console.WriteLine($"sk (tlcs): {sk.ToString(16)} (chiave segreta ricostruita)");
-      Console.WriteLine($"=============================");
-
-      return sk;
-    }
-    public bool CheckSK(BigInteger skToCheck)
-    {
-      return this.sk.Equals(skToCheck);
-    }
-
+    
     public int[] GetRandomArrayForProof(int k)
     {
       var array_b_string = "";
-      array_b_string += this.PK.Normalize().ToCompressedPoint().ToLower();
+      array_b_string += this.pp.PK.Normalize().ToCompressedPoint().ToLower();
       for (int j = 0; j < k; j++)
       {
         array_b_string += this.proof[j].left.PK.Normalize().ToCompressedPoint().ToLower() + this.proof[j].left.T.GetStr(16) + this.proof[j].left.y;

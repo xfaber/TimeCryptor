@@ -44,12 +44,14 @@ namespace TimeCryptor
       Console.WriteLine($"parametro di sicurezza k: {_globalParams.k}");
       Console.WriteLine($"Curva ellittica scelta: {_globalParams.ecCurveName}");
 
-      //IMPOSTO LA DATA FUTURA, RECUPERO LA DATA FUTURA      
+      # region IMPOSTAZIONE MESSAGGIO DA CIFRARE, DATA FUTURA e RECUPERO DEL NUMERO DI ROUND
+      var message = "Hello TLE!";
       var futureDateTime = DateTime.Now.AddSeconds(10);
       var round = LeagueOfEntropy.GetRound(futureDateTime);
       Console.WriteLine($"Data futura impostata: {futureDateTime.ToString("dd/MM/yyyy HH:mm:ss")} round:{round}");
       _LOE.Round = round;
       _globalParams.PKLOE = (G2)_LOE.pk;
+      #endregion
 
       //L'INSIEME DI PARTI GENERANO I PARAMETRI PUBBLICI E LI PUBBLICANO SULLA BLOCKCHAIN       
       _contributors = new Contributor[_globalParams.numeroContributori];
@@ -84,8 +86,7 @@ namespace TimeCryptor
       var publicKeyParameters = new ECPublicKeyParameters(MPK_R, _globalParams.ecParams);
 
       //GENERA LA COPPIA DI CHIAVI DEL MITTENTE
-      var keyPairSender = ECIES.GenerateECIESKeyPair(_globalParams.ecParams);
-      var message = "Hello TLE!";
+      var keyPairSender = ECIES.GenerateECIESKeyPair(_globalParams.ecParams);      
       var cipherText = ECIES.Encrypt(message, keyPairSender.Private, publicKeyParameters);
       var cipherTextString = Convert.ToBase64String(cipherText);
       Console.WriteLine($"Testo originale: {message}");

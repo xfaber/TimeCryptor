@@ -29,7 +29,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="TimeCryptor.Blockchain_Item">
-    <Position X="4.25" Y="6.75" Width="2" />
+    <Position X="2.75" Y="6.75" Width="2" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAACAAAAAAQAAAgAAQAAAAAA=</HashCode>
       <FileName>Blockchain.cs</FileName>
@@ -44,14 +44,14 @@
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="TimeCryptor.GlobalParams">
-    <Position X="16.5" Y="5.5" Width="2.5" />
+    <Position X="16.5" Y="5.75" Width="2.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAQAAAAAAAAAIAAAAAAAAEACAAAgAAAAAAAAAA=</HashCode>
       <FileName>GlobalParams.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="TimeCryptor.LeagueOfEntropy">
-    <Position X="13.5" Y="5.5" Width="2.5" />
+    <Position X="13.5" Y="5.75" Width="2.5" />
     <NestedTypes>
       <Enum Name="TimeCryptor.LeagueOfEntropy.KeyModeEnum">
         <TypeIdentifier>
@@ -79,23 +79,10 @@
     </TypeIdentifier>
   </Class>
   <Class Name="TimeCryptor.PK_T_y_Item">
-    <Position X="4.75" Y="10.25" Width="1.5" />
+    <Position X="11" Y="6.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgCAAEAAA=</HashCode>
       <FileName>PK_T_y_Item.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="TimeCryptor.PK_T_y_ItemExtended">
-    <Position X="7.25" Y="10.5" Width="1.75" />
-    <InheritanceLine Type="TimeCryptor.PK_T_y_Item" ManuallyRouted="true">
-      <Path>
-        <Point X="6.25" Y="11.116" />
-        <Point X="7.25" Y="11.116" />
-      </Path>
-    </InheritanceLine>
-    <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAA=</HashCode>
-      <FileName>PK_T_y_ItemExtended.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="TimeCryptor.PoC_TlcsMuon_i">
@@ -133,7 +120,7 @@
     </TypeIdentifier>
   </Class>
   <Class Name="TimeCryptor.Proof_Item">
-    <Position X="7" Y="6.75" Width="2.25" />
+    <Position X="2.75" Y="8.75" Width="2.25" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAgAA=</HashCode>
       <FileName>Proof_Item.cs</FileName>
@@ -142,19 +129,19 @@
   <Class Name="TimeCryptor.Contributor">
     <Position X="10.5" Y="2.25" Width="2.5" />
     <TypeIdentifier>
-      <HashCode>AABAAAAAAQAACAAAAIAAAASQAAAAAAgAgwAgCBAEAAA=</HashCode>
+      <HashCode>AABAAAAAAAAACAAAAIAAAASAAAAAAAgAgwAAQBAAAAA=</HashCode>
       <FileName>Contributor.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="TimeCryptor.SmartContract">
     <Position X="16.5" Y="2.25" Width="2.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAUAEAIAAAQAAAAAAAAACAAAAAAAAgAAIAAAAAAA=</HashCode>
+      <HashCode>AAAAAUAEAIAAAQAAAAAABAACAAAAAAAAgAAIAAAAAAA=</HashCode>
       <FileName>SmartContract.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Enum Name="TimeCryptor.verifyMode">
-    <Position X="16.25" Y="9.5" Width="1.5" />
+    <Position X="17" Y="9.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAABAAAAA=</HashCode>
       <FileName>GlobalParams.cs</FileName>

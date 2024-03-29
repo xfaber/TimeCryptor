@@ -26,61 +26,6 @@ using BigInteger = System.Numerics.BigInteger;
 
 namespace TimeCryptor
 {
-  /// <summary>
-  /// Parametri della curv aBaby Jub Jub in forma Montgomery
-  /// </summary>
-  public static class BJJDomainParameters_M
-  {
-    public static Org.BouncyCastle.Math.BigInteger a { get { return new Org.BouncyCastle.Math.BigInteger("168698"); } }
-    //Parametri usati per le chiavi generate da stub Iovino su GitHub
-    //public static Org.BouncyCastle.Math.BigInteger b { get { return Org.BouncyCastle.Math.BigInteger.One; } }
-
-    //Parametri usati per le chiavi generate sul sito AragonZK
-    public static Org.BouncyCastle.Math.BigInteger b { get { return new Org.BouncyCastle.Math.BigInteger("168700"); } }
-  }
-
-  /// <summary>
-  /// Parametri della curv aBaby Jub Jub in forma Twisted Edwards
-  /// </summary>
-  public static class BJJDomainParameters_TE
-  {
-    // parametri presi da https://eips.ethereum.org/EIPS/eip-2494 e da https://docs.rs/ark-ed-on-bn254/latest/ark_ed_on_bn254/
-    //Equazione della curva ax^2 + y^2 = 1 + dx^2y^2
-    //La curva è definita su un campo primo finito di p elementi (con p numero primo)
-    public static Org.BouncyCastle.Math.BigInteger p { get { return new Org.BouncyCastle.Math.BigInteger("21888242871839275222246405745257275088548364400416034343698204186575808495617"); } }
-
-    // mumero primo a 251 bit
-    public static Org.BouncyCastle.Math.BigInteger l { get { return new Org.BouncyCastle.Math.BigInteger("2736030358979909402780800718157159386076813972158567259200215660948447373041"); } }
-
-    // cofattore
-    public static Org.BouncyCastle.Math.BigInteger h { get { return new Org.BouncyCastle.Math.BigInteger("8"); } }
-
-    public static Org.BouncyCastle.Math.BigInteger n { get { return new Org.BouncyCastle.Math.BigInteger("21888242871839275222246405745257275088614511777268538073601725287587578984328"); } }
-
-    //Generator Point G
-    //Il punto G=(x,y) che genera tutti gli n punti della curva
-    public static Org.BouncyCastle.Math.BigInteger Gx { get { return new Org.BouncyCastle.Math.BigInteger("995203441582195749578291179787384436505546430278305826713579947235728471134"); } }
-    public static Org.BouncyCastle.Math.BigInteger Gy { get { return new Org.BouncyCastle.Math.BigInteger("5472060717959818805561601436314318772137091100104008585924551046643952123905"); } }
-
-
-    //Parametri usati per le chiavi generate da stub Iovino su GitHub
-    //public static Org.BouncyCastle.Math.BigInteger a { get { return new Org.BouncyCastle.Math.BigInteger("168700"); } }
-    //public static Org.BouncyCastle.Math.BigInteger d { get { return new Org.BouncyCastle.Math.BigInteger("168696"); } }
-    //Base Point B
-    //Il punto B=(x,y) che genera il sottogruppo di punti P di Baby Jubjub soddisfacente l * P = O 
-    //genera l'insieme dei punti di ordine l e origine O
-    // public static Org.BouncyCastle.Math.BigInteger Bx { get { return new Org.BouncyCastle.Math.BigInteger("5299619240641551281634865583518297030282874472190772894086521144482721001553"); } }
-    // public static Org.BouncyCastle.Math.BigInteger By { get { return new Org.BouncyCastle.Math.BigInteger("16950150798460657717958625567821834550301663161624707787222815936182638968203"); } }
-
-
-    //Parametri usati per le chiavi generate sul sito AragonZK
-    //https://github.com/arkworks-rs/algebra/blob/master/curves/ed_on_bn254/src/lib.rs
-    public static Org.BouncyCastle.Math.BigInteger a { get { return new Org.BouncyCastle.Math.BigInteger("1"); } }
-    public static Org.BouncyCastle.Math.BigInteger d { get { return new Org.BouncyCastle.Math.BigInteger("9706598848417545097372247223557719406784115219466060233080913168975159366771"); } }
-    public static Org.BouncyCastle.Math.BigInteger Bx { get { return new Org.BouncyCastle.Math.BigInteger("19698561148652590122159747500897617769866003486955115824547446575314762165298"); } }
-    public static Org.BouncyCastle.Math.BigInteger By { get { return new Org.BouncyCastle.Math.BigInteger("19298250018296453272277890825869354524455968081175474282777126169995084727839"); } }
-  }
-
   public static class CryptoUtils
   {
     private const string _defaultIV = "\"myNE?o,CSn2_,-R";
@@ -291,19 +236,19 @@ namespace TimeCryptor
           // Generator point TE BabyJubJub
           // parametri presi da https://eips.ethereum.org/EIPS/eip-2494 e da https://docs.rs/ark-ed-on-bn254/latest/ark_ed_on_bn254/
           //"Base Point TE"
-          var generatorX_TE = BJJDomainParameters_TE.Bx;
-          var generatorY_TE = BJJDomainParameters_TE.By;
+          var generatorX_TE = BJJUtils.BJJDomainParameters_TE.Bx;
+          var generatorY_TE = BJJUtils.BJJDomainParameters_TE.By;
           //"Generator Point TE"
-          //var generatorX_TE = BJJDomainParameters_TE.Gx;
-          //var generatorY_TE = BJJDomainParameters_TE.Gy;
+          //var generatorX_TE = BJJUtils.BJJDomainParameters_TE.Gx;
+          //var generatorY_TE = BJJUtils.BJJDomainParameters_TE.Gy;
           Console.WriteLine("\n=== Conversione punto generatore da Twisted Edwards a Weierstrass ===");
           var generatorPoint_W = ConvertFromTwistedEdwardsToWeierstrass(generatorX_TE, generatorY_TE);
 
           Console.WriteLine($"Coordinate Weierstrass Generatore ({generatorPoint_W.x},{generatorPoint_W.y})");
 
           //Calcolo dei parameri a e b 
-          var a_MO = BJJDomainParameters_M.a;
-          var b_MO = BJJDomainParameters_M.b;
+          var a_MO = BJJUtils.BJJDomainParameters_M.a;
+          var b_MO = BJJUtils.BJJDomainParameters_M.b;
           /*
             Reference: https://en.wikipedia.org/wiki/Montgomery_curve  
             Equation in Montgomery form: By^2 = x^3 + Ax^2 + x
@@ -316,7 +261,7 @@ namespace TimeCryptor
 
             num/den mod p => den.ModInverse(p).Multiply(num).Mod(p)  
           */
-          p = BJJDomainParameters_TE.p;
+          p = BJJUtils.BJJDomainParameters_TE.p;
           var a_num = Org.BouncyCastle.Math.BigInteger.Three.Subtract(a_MO.ModPow(Org.BouncyCastle.Math.BigInteger.Two, p)).Mod(p);
           var a_den = Org.BouncyCastle.Math.BigInteger.Three.Multiply(b_MO.ModPow(Org.BouncyCastle.Math.BigInteger.Two, p)).Mod(p);
           a = a_den.ModInverse(p).Multiply(a_num).Mod(p);
@@ -327,8 +272,8 @@ namespace TimeCryptor
           b = b_den.ModInverse(p).Multiply(b_num).Mod(p);
           Console.WriteLine($"Parametri Weierstrass \na: {a} \nb: {b}");
 
-          n = BJJDomainParameters_TE.l;
-          h = BJJDomainParameters_TE.h;
+          n = BJJUtils.BJJDomainParameters_TE.l;
+          h = BJJUtils.BJJDomainParameters_TE.h;
           generatorX = generatorPoint_W.x;
           generatorY = generatorPoint_W.y;
           break;
@@ -1132,7 +1077,7 @@ namespace TimeCryptor
         var segno_y = (prefix == "02") ? 1 : -1;
         //la chiave compressa contiene la sola coordinata x del punto ed il segno della y (nelle prime due cifre)
         //domain parameters JubJub (twistded edwards form)
-        var p = BJJDomainParameters_TE.p;
+        var p = BJJUtils.BJJDomainParameters_TE.p;
         //var a_W = new Org.BouncyCastle.Math.BigInteger("7296080957279758407415468581752425029516121466805344781232734728849116493472");
         //var b_W = new Org.BouncyCastle.Math.BigInteger("16213513238399463127589930181672055621146936592900766180517188641980520820846");
 
@@ -1178,9 +1123,9 @@ namespace TimeCryptor
         var segno_y = (prefix == "02") ? 1 : -1;
         //la chiave compressa contiene la sola coordinata x del punto ed il segno della y (nelle prime due cifre)
         //domain parameters JubJub (twistded edwards form)
-        var p = BJJDomainParameters_TE.p;
-        var a_MO = BJJDomainParameters_M.a;
-        var b_MO = BJJDomainParameters_M.b;
+        var p = BJJUtils.BJJDomainParameters_TE.p;
+        var a_MO = BJJUtils.BJJDomainParameters_M.a;
+        var b_MO = BJJUtils.BJJDomainParameters_M.b;
         //Montgomery By^2 = x^3 + Ax^2 + x (dato che B=1) ==>  y^2 = x^3 + Ax^2 + x
         // babyjubjub Montgomery y^2 = x^3 + Ax^2 + x ==>  ricavo y in funzione di x ==> y = sqrt( x^3 + Ax^2 + x )
         y_MO = x_MO.ModPow(Org.BouncyCastle.Math.BigInteger.Three, p)
@@ -1234,9 +1179,9 @@ namespace TimeCryptor
       {
         var segno_y = (prefix == "02") ? 1 : -1;
         //la chiave compressa contiene la sola coordinata x del punto ed il segno della y (nelle prime due cifre)
-        var p = BJJDomainParameters_TE.p;
-        var a_TE = BJJDomainParameters_TE.a;
-        var d_TE = BJJDomainParameters_TE.d;
+        var p = BJJUtils.BJJDomainParameters_TE.p;
+        var a_TE = BJJUtils.BJJDomainParameters_TE.a;
+        var d_TE = BJJUtils.BJJDomainParameters_TE.d;
 
         // babyjubjub Twisted Edwards ax^2 + y^2 = 1 + dx^2y^2 ==>  ricavo y in funzione di x ==> y = sqrt( (1 - a*x^2) / (1 - d*x^2) )
         var y_TE_num = Org.BouncyCastle.Math.BigInteger.One.Subtract(a_TE.Multiply(x_TE.ModPow(Org.BouncyCastle.Math.BigInteger.Two, p)).Mod(p)).Mod(p);
@@ -1275,9 +1220,9 @@ namespace TimeCryptor
       var ret = false;
 
       //domain parameters JubJub (twistded edwards form)
-      var p = BJJDomainParameters_TE.p;
-      var a_TE = BJJDomainParameters_TE.a;
-      var d_TE = BJJDomainParameters_TE.d;
+      var p = BJJUtils.BJJDomainParameters_TE.p;
+      var a_TE = BJJUtils.BJJDomainParameters_TE.a;
+      var d_TE = BJJUtils.BJJDomainParameters_TE.d;
 
       var eq_left = a_TE.Multiply(x.ModPow(Org.BouncyCastle.Math.BigInteger.Two, p)).Mod(p).Add(y.ModPow(Org.BouncyCastle.Math.BigInteger.Two, p)).Mod(p);
       var eq_right = Org.BouncyCastle.Math.BigInteger.One
@@ -1296,9 +1241,9 @@ namespace TimeCryptor
     {
       var ret = false;
       //Montgomery By^2 = x^3 + Ax^2 + x (se B=1) ==>  y^2 = x^3 + Ax^2 + x
-      var p = BJJDomainParameters_TE.p;
-      var a_MO = BJJDomainParameters_M.a;
-      var b_MO = BJJDomainParameters_M.b;
+      var p = BJJUtils.BJJDomainParameters_TE.p;
+      var a_MO = BJJUtils.BJJDomainParameters_M.a;
+      var b_MO = BJJUtils.BJJDomainParameters_M.b;
       var eq_left = b_MO.Multiply(Y.ModPow(Org.BouncyCastle.Math.BigInteger.Two, p)).Mod(p);
       var eq_right = X.ModPow(Org.BouncyCastle.Math.BigInteger.Three, p).Add(a_MO.Multiply(X.ModPow(Org.BouncyCastle.Math.BigInteger.Two, p))).Mod(p).Add(X).Mod(p);
       ret = (eq_left.CompareTo(eq_right) == 0);
@@ -1310,11 +1255,11 @@ namespace TimeCryptor
     {
       Console.WriteLine($"Coordinate Montgomery ({x_MO},{y_MO})");
       //domain parameters JubJub
-      var p = BJJDomainParameters_TE.p;
+      var p = BJJUtils.BJJDomainParameters_TE.p;
 
       //Montgomery By^2 = x^3 + Ax^2 + x (se B=1) ==>  y^2 = x^3 + Ax^2 + x
-      var a_MO = BJJDomainParameters_M.a;
-      var b_MO = BJJDomainParameters_M.b;
+      var a_MO = BJJUtils.BJJDomainParameters_M.a;
+      var b_MO = BJJUtils.BJJDomainParameters_M.b;
       // Conversion Montgomery to Weierstrass is (X, Y)->(x_W, y_W) = (X + A/3, Y)
       // ATTENZIONE Se B è diverso da 1 ==>  (X, Y)->(x_W, y_W) = (X/B + A/3*B, Y/B)
       var x_W = b_MO.ModInverse(p).Multiply(x_MO).Mod(p).Add((Org.BouncyCastle.Math.BigInteger.Three.Multiply(b_MO).Mod(p)).ModInverse(p).Multiply(a_MO).Mod(p)).Mod(p);
@@ -1341,11 +1286,11 @@ namespace TimeCryptor
         
         num/den mod p => den.ModInverse(p).Multiply(num).Mod(p)  
       */
-      var a_MO = BJJDomainParameters_M.a;
-      var b_MO = BJJDomainParameters_M.b;
+      var a_MO = BJJUtils.BJJDomainParameters_M.a;
+      var b_MO = BJJUtils.BJJDomainParameters_M.b;
 
       //domain parameters JubJub in Weierstrass form
-      var p = BJJDomainParameters_TE.p;
+      var p = BJJUtils.BJJDomainParameters_TE.p;
       var a_num = Org.BouncyCastle.Math.BigInteger.Three.Subtract(a_MO.ModPow(Org.BouncyCastle.Math.BigInteger.Two, p)).Mod(p);
       var a_den = Org.BouncyCastle.Math.BigInteger.Three.Multiply(b_MO.ModPow(Org.BouncyCastle.Math.BigInteger.Two, p)).Mod(p);
       var a = a_den.ModInverse(p).Multiply(a_num).Mod(p);
@@ -1369,7 +1314,7 @@ namespace TimeCryptor
     {
       //Console.WriteLine($"Coordinate Twisted Edwards ({x_TE},{y_TE})");
       //domain parameters JubJub
-      var p = BJJDomainParameters_TE.p;
+      var p = BJJUtils.BJJDomainParameters_TE.p;
 
       // Conversion from Twisted Edwards to Montgomery is (x,y)->(X,Y)=((1+y)/(1-y),(1+y)/((1-y)x))
       var UnoPiuY = Org.BouncyCastle.Math.BigInteger.One.Add(y_TE).Mod(p);
@@ -1379,12 +1324,12 @@ namespace TimeCryptor
       var Y = UnoMenoYX.ModInverse(p).Multiply(UnoPiuY).Mod(p);
 
       //Montgomery By^2 = x^3 + Ax^2 + x (dato che B=1) ==>  y^2 = x^3 + Ax^2 + x
-      var a_MO = BJJDomainParameters_M.a;
-      var b_MO = BJJDomainParameters_M.b;
+      var a_MO = BJJUtils.BJJDomainParameters_M.a;
+      var b_MO = BJJUtils.BJJDomainParameters_M.b;
 
       //conversion from TE to MO A=2*(a+d)/(a-d) B=4/(a-d)
-      var a_meno_d = BJJDomainParameters_TE.a.Subtract(BJJDomainParameters_TE.d).Mod(p);
-      var a_piu_d = BJJDomainParameters_TE.a.Add(BJJDomainParameters_TE.d).Mod(p);
+      var a_meno_d = BJJUtils.BJJDomainParameters_TE.a.Subtract(BJJUtils.BJJDomainParameters_TE.d).Mod(p);
+      var a_piu_d = BJJUtils.BJJDomainParameters_TE.a.Add(BJJUtils.BJJDomainParameters_TE.d).Mod(p);
       var a2_MO = a_meno_d.ModInverse(p).Multiply(Org.BouncyCastle.Math.BigInteger.Two.Multiply(a_piu_d).Mod(p)).Mod(p);
       var b2_MO = a_meno_d.ModInverse(p).Multiply(Org.BouncyCastle.Math.BigInteger.Four).Mod(p);
 

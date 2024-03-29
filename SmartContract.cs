@@ -13,13 +13,20 @@ namespace TimeCryptor
     public int[] ChooseRandomBitArray(int k)
     {
       //Il verifier sceglie un array di k bit casuali (usando gli interi 0 e 1)
+      return ChooseRandomArray(k, 1);
+    }
+
+    public int[] ChooseRandomArray(int k, int maxValue)
+    {
+      //sceglie un array di k valori interi asuali
       var b = new int[k];
       Random r = new Random();
-      while (b.Any(item => item == 1) == false)
+      while (b.All(item => item == 0)) //per escludere la scelta di tutti i valori 0
+      //while (b.Distinct().Count()==1) //per escludere la scelta di tutti i valori uguali
       {
         for (int i = 0; i < b.Length; i++)
         {
-          b[i] = r.Next(0, 2);
+          b[i] = r.Next(0, maxValue + 1);
         }
       }
       return b;
@@ -110,7 +117,7 @@ namespace TimeCryptor
       var Z_temp = new GT();
       var e = new GT();
       e.Pairing(HC, globalParams.PKLOE);   // e(H1(C),PKL)
-      Z_temp.Pow(e, tupleToBeVerify.t);            // Zi = e(H1(C),PKL)^ti
+      Z_temp.Pow(e, tupleToBeVerify.t);    // Zi = e(H1(C),PKL)^ti
       if (!Z_temp.IsValid()) throw new Exception("Z_temp not valid!");
 
       byte[] Zbytes = Z_temp.Serialize();

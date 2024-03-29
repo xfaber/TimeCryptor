@@ -173,6 +173,10 @@ namespace TimeCryptor.Utils
 
       return ret;
     }
+
+    /// <summary>
+    /// Parametri della curv aBaby Jub Jub in forma Montgomery
+    /// </summary>
     public static class BJJDomainParameters_M
     {
       public static BigInteger a { get { return new BigInteger("168698"); } }

@@ -14,13 +14,11 @@ namespace TimeCryptor
     public enum CurveEnum
     {
       secp256k1,
-      babyjubjub,
-      BLS12_381
+      babyjubjub
     }
 
     public static void Run_Test_ValidationKeys()
     {
-
       var timeLockZone = new TimeLockZone();
 
       //Test delle chiavi restituite dal servizio TimeLock.Zone(alpha) di AragonZK                                       Parametri Iovino           Parametri Aragon
@@ -45,7 +43,7 @@ namespace TimeCryptor
       //Console.WriteLine($"=== {ECIESTest_BC(listKeyPair.Single(s => s.Round == 4386431))} ===\n\n");
 
 
-      //Test delle chiavi restituite dal PoC di Iovino (scritto in C)
+      //Test delle chiavi restituite dalla PoC di Iovino (scritto in C)
       //====================
       //Test_TimeLockZoneKeyPair(timeLockZone.GetKeyPair(9016577));
       //Test_TimeLockZoneKeyPair(timeLockZone.GetKeyPair(9048294));
