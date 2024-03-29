@@ -1,4 +1,5 @@
-﻿using Org.BouncyCastle.Crypto.Parameters;
+﻿using Org.BouncyCastle.Crypto;
+using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Utilities.Encoders;
 using System;
 using System.Collections.Generic;
@@ -6,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using static TimeCryptor.Test_TimelockZone;
+using static TimeCryptor.Utils.BJJUtils;
 
 namespace TimeCryptor
 {
@@ -33,14 +35,14 @@ namespace TimeCryptor
       //Test_TimeLockZoneKeyPair(timeLockZone.GetKeyPair(2161011)); //03 Round: 2161011 (06 November 2023 17:00:00) - Baby Jubjub --> Invalid Point            --> PK Derivata corretta
       //Test_TimeLockZoneKeyPair(timeLockZone.GetKeyPair(2205411)); //03 Round: 2205411 (08 November 2023 06:00:00) - Baby Jubjub                              --> Invalid Point
 
-      //Test_TimeLockZoneKeyPair(timeLockZone.GetKeyPair(4893691)); //02 Round: 4893691(9 February 2024 14:14:00) - Baby Jubjub  --> OK
+      Test_TimeLockZone_KeyPair(timeLockZone.GetKeyPair(4893691)); //02 Round: 4893691(9 February 2024 14:14:00) - Baby Jubjub  --> OK
       //Test_TimeLockZoneKeyPair(timeLockZone.GetKeyPair(4894031)); //03 Round: 4894031(9 February 2024 14:31:00) - Baby Jubjub --> OK
       //Test_TimeLockZoneKeyPair(timeLockZone.GetKeyPair(4386431)); //Round: 4383771(22 January 2024 21:18:00) - Baby Jubjub    --> KO
 
       //Test_TimeLockZoneKeyPair(timeLockZone.GetKeyPair(3139851)); //Round: 3139851; //(10 December 2023 16:42:00) - Secp256k1 --> OK
       //Test_TimeLockZoneKeyPair(timeLockZone.GetKeyPair(4893631)); //Round: 4893631(9 February 2024 14:11:00) - Secp256k1  -->OK
 
-      //Console.WriteLine($"=== {ECIESTest_BC(listKeyPair.Single(s => s.Round == 4386431))} ===\n\n");
+      //Console.WriteLine($"=== {Test_TimelockZone_ECIES(listKeyPair.Single(s => s.Round == 4386431))} ===\n\n");
 
 
       //Test delle chiavi restituite dalla PoC di Iovino (scritto in C)
@@ -49,21 +51,21 @@ namespace TimeCryptor
       //Test_TimeLockZoneKeyPair(timeLockZone.GetKeyPair(9048294));
       //Test_TimeLockZoneKeyPair(timeLockZone.GetKeyPair(9068234));
       //Test_TimeLockZoneKeyPair(timeLockZone.GetKeyPair(9163298));
-      //Console.WriteLine($"=== {ECIESTest_BC(listKeyPair.Single(s => s.Round == 9016577))} ===\n\n");
-      //Console.WriteLine($"=== {ECIESTest_BC(listKeyPair.Single(s => s.Round == 9048294))} ===\n\n");
-      //Console.WriteLine($"=== {ECIESTest_BC(listKeyPair.Single(s => s.Round == 9068234))} ===\n\n");
-      //Console.WriteLine($"=== {ECIESTest_BC(listKeyPair.Single(s => s.Round == 9163298))} ===\n\n");
+      //Console.WriteLine($"=== {Test_TimelockZone_ECIES(listKeyPair.Single(s => s.Round == 9016577))} ===\n\n");
+      //Console.WriteLine($"=== {Test_TimelockZone_ECIES(listKeyPair.Single(s => s.Round == 9048294))} ===\n\n");
+      //Console.WriteLine($"=== {Test_TimelockZone_ECIES(listKeyPair.Single(s => s.Round == 9068234))} ===\n\n");
+      //Console.WriteLine($"=== {Test_TimelockZone_ECIES(listKeyPair.Single(s => s.Round == 9163298))} ===\n\n");
 
-      //Console.WriteLine($"=== {ECIESTest_BC(listKeyPair.Single(s => s.Round == 4893631))} ===\n\n");
-      //Console.WriteLine($"=== {ECIESTest_BC(listKeyPair.Single(s => s.Round == 4893691))} ===\n\n");
-      //Console.WriteLine($"=== {ECIESTest_BC(listKeyPair.Single(s => s.Round == 4894031))} ===\n\n"); 
+      //Console.WriteLine($"=== {Test_TimelockZone_ECIES(listKeyPair.Single(s => s.Round == 4893631))} ===\n\n");
+      Console.WriteLine($"=== {Test_TimelockZone_ECIES(timeLockZone.GetKeyPair(4893691))} ===\n\n");
+      //Console.WriteLine($"=== {Test_TimelockZone_ECIES(listKeyPair.Single(s => s.Round == 4894031))} ===\n\n"); 
     }
     
     /// <summary>
     /// Controlla che la coppia di chiavi restituite dal servizio TimeLock.zone sia corretta la sk sia invertibile (ossi ala chiave derivata dalal privata sia corretta)
     /// </summary>
     /// <param name="kp">Coppia di chiavi (sk,PK)</param>
-    private static void Test_TimeLockZoneKeyPair(KeyPairToCheck kp)
+    private static void Test_TimeLockZone_KeyPair(KeyPairToCheck kp)
     {
       try
       {
@@ -154,6 +156,68 @@ namespace TimeCryptor
 
       }
     }
+    private static bool Test_TimelockZone_ECIES(KeyPairToCheck kp)
+    {
+      var ret = false;
+      try
+      {
+        Console.WriteLine($"=== Coppia di chiavi in uso ===");
+        Console.WriteLine($"PK: {kp.PublicKeyHex}");
+        Console.WriteLine($"PK W: {kp?.PublicKeyHexW}");
+        Console.WriteLine($"SK: {kp.PrivateKeyHex}");
+        Console.WriteLine($"Curve: {kp.Curve}");
+
+        var isOriginalPkPointDecompressed = false;
+        if (kp.PublicKeyHex.Substring(2, 2) == "04") isOriginalPkPointDecompressed = true;
+        var publicKeyHex = kp.PublicKeyHex;
+        if (kp.Curve == CurveEnum.babyjubjub)
+        {
+          //Conversion PK BJJ Twisted Edwards --> Weierstrass
+          var point_TE = CryptoUtils.DecompressTwistedEdwardsBjjKey(publicKeyHex);
+          var point_W = CryptoUtils.ConvertFromTwistedEdwardsToWeierstrass(point_TE.x, point_TE.y);
+          publicKeyHex = CryptoUtils.CompressWeierstrassBjjPoint(point_W.x, point_W.y);
+        }
+
+        var ecParameters = CryptoUtils.GetEcDomainParametersByCustomData(kp.Curve.ToString());
+
+        var ecPrivateKeyParamsD = new Org.BouncyCastle.Math.BigInteger(kp.PrivateKeyHex.Substring(2), 16);
+        if (kp.Curve == CurveEnum.babyjubjub && isOriginalPkPointDecompressed) ecPrivateKeyParamsD = ecPrivateKeyParamsD.Mod(BJJDomainParameters_TE.l);
+        var privateKeyParameters = new ECPrivateKeyParameters(ecPrivateKeyParamsD, ecParameters);
+
+        byte[] publicKeyBytes = Hex.Decode(publicKeyHex.Substring(2));
+        var publicKeyPoint = ecParameters.Curve.DecodePoint(publicKeyBytes);
+        var publicKeyParameters = new ECPublicKeyParameters(publicKeyPoint, ecParameters);
+
+        var keyPairRecipient = new AsymmetricCipherKeyPair(publicKeyParameters, privateKeyParameters);
+
+        //ENCRYPT
+        //Genera la coppia di chiavi del mittente
+        var ecParams = CryptoUtils.GetEcDomainParametersByCustomData(kp.Curve.ToString());
+        var keyPairSender = ECIES.GenerateECIESKeyPair(ecParams);
+        //var skBytes = Org.BouncyCastle.Pkcs.PrivateKeyInfoFactory.CreatePrivateKeyInfo(keyPairSender.Private).ParsePrivateKey().GetDerEncoded();
+        //var pkBytes = Org.BouncyCastle.X509.SubjectPublicKeyInfoFactory.CreateSubjectPublicKeyInfo(keyPairSender.Public).GetDerEncoded();
+        //Console.WriteLine($"pk effimera sender:\n{Convert.ToHexString(pkBytes)}"); ;
+        //Console.WriteLine($"sk effimera sender:\n{Convert.ToHexString(skBytes)}");
+
+        var message = "Ciao TLE!";
+        var cipherText = ECIES.Encrypt(message, keyPairSender.Private, keyPairRecipient.Public);
+        var cipherTextString = Convert.ToBase64String(cipherText);
+        Console.WriteLine($"Testo originale: {message}");
+        Console.WriteLine($"Testo cifrato: {cipherTextString}");
+
+        //DECRYPT
+        var plainText = ECIES.Decrypt(cipherText, keyPairSender.Public, keyPairRecipient.Private);
+        Console.WriteLine($"Testo decifrato: {plainText}");
+
+        ret = plainText == message;
+      }
+      catch (Exception ex)
+      {
+        ret = false;
+        Console.WriteLine($"\nErrore: {ex.Message}");
+      }
+      return ret;
+    }
   }
 
   public class TimeLockZone
@@ -235,7 +299,7 @@ namespace TimeCryptor
       //Successfully inverted sk 217C64192418EF7D9F9CB0750CB3F4E8CFDBB73363C7983EBEEB8BDC8AC0624F
       #endregion
 
-      #region chiavi BJJ da servizio TimeLock.zone 
+      #region Chiavi BJJ da servizio TimeLock.zone 
       //Round: 2849811(30 November 2023 15:00:00) - Baby Jubjub
       keyPairToCheck = new KeyPairToCheck() { Curve = CurveEnum.babyjubjub };
       keyPairToCheck.Id = id++;

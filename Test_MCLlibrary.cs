@@ -215,15 +215,13 @@ namespace TimeCryptor
       var round = LeagueOfEntropy.GetRound(futureDateTime);
       Console.WriteLine($"Data futura impostata: {futureDateTime.ToString("dd/MM/yyyy HH:mm:ss")} round:{round}");
 
-      var LOE = new LeagueOfEntropy(LeagueOfEntropy.KeyModeEnum.FromLocal);
-      LOE.Round = round;
-      LOE.Set_LOE_Data_FromLocal();
-      var sigmaLOE = LOE.sigma;
+      var LOE = new LeagueOfEntropy(LeagueOfEntropy.KeyModeEnum.FromLocal,round);
+      var sigmaLOE = LOE.GetSigma(round);
       while (sigmaLOE == null)
       {
         Console.WriteLine($"{DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss")} -> firma LOE non disponibile, attendo...");
         Thread.Sleep(1000);
-        sigmaLOE = LOE.sigma;
+        sigmaLOE = LOE.GetSigma(round);
       }
 
       var checkFirma = LeagueOfEntropy.VerifySign(round, (G1)sigmaLOE, (G2)LOE.pk);      

@@ -2,6 +2,7 @@
 using Org.BouncyCastle.Math;
 using System;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using static mcl.MCL;
 
 namespace TimeCryptor
@@ -13,47 +14,22 @@ namespace TimeCryptor
       FromWeb, //recupera chiave PK e firma BLS dal servizio rest api su internet
       FromLocal //crea chiavi firma con chiavi generate in locale
     }
-    public LeagueOfEntropy(KeyModeEnum keyMode, string drandNetworkHash = "52db9ba70e0cc0f6eaf7803dd07447a1f5477735fd3f661792ba94600c84e971")
+    public LeagueOfEntropy(KeyModeEnum keyMode, ulong? round=null, string drandNetworkHash = "52db9ba70e0cc0f6eaf7803dd07447a1f5477735fd3f661792ba94600c84e971")
     {
+      if (keyMode == KeyModeEnum.FromLocal && round == null) throw new Exception("round missing");
       this.DrandNetworkHash = drandNetworkHash;
       this.KeyMode = keyMode;
+      if (keyMode == KeyModeEnum.FromLocal) Set_LOE_Data_FromLocal((ulong)round);
+      else this.pk = GetPkFromWeb();
     }
 
     public KeyModeEnum KeyMode { get; private set; }
-    private G2? _pk;
-    public G2? pk
-    {
-      get
-      {
-        if (_pk == null)
-        {
-          if (this.KeyMode == KeyModeEnum.FromWeb)
-            Set_PKLOE_FromWeb();
-          else
-            Set_LOE_Data_FromLocal();
-        }
-        return _pk;
-      }
-      set { _pk = value; }
-    }
+    public G2 pk { get; set; }
+
     private Fr sk { get; set; }
-    public ulong Round { get; set; }
-
-    private G1? _sigma;
-    public G1? sigma
-    {
-      get
-      {
-        if (_sigma == null)
-        {
-          if (this.KeyMode == KeyModeEnum.FromWeb)
-            SetSigmaFromWeb();
-        }
-        return _sigma;
-      }
-      set { _sigma = value; }
-    }
-
+    
+    private G1? sigma { get; set; }
+    
     public string DrandNetworkHash { get; }
 
     public static bool VerifySign(ulong round, G1 sigma, G2 pk)
@@ -87,7 +63,7 @@ namespace TimeCryptor
     /// </summary>
     /// <param name="round">il numero di round</param>
     /// <returns>(Fr sk, G2 pk, G1 sigma)</returns>
-    public void Set_LOE_Data_FromLocal()
+    public void Set_LOE_Data_FromLocal(ulong round)
     {
       //Test di una firma BLS
       //Init(BLS12_381);
@@ -106,7 +82,7 @@ namespace TimeCryptor
       pk.Mul(g2, sk);
 
       //firma il messaggio calcolando s = sk H(msg)      
-      var h = CryptoUtils.H1(this.Round);
+      var h = CryptoUtils.H1(round);
       var sigma = new G1();
       sigma.Mul(h, sk);
 
@@ -118,7 +94,7 @@ namespace TimeCryptor
 
       var verificaFirma = e1.Equals(e2);
       Console.WriteLine($"\n=== PARAMETRI LOE ===");
-      Console.WriteLine($"Round: {this.Round}");
+      Console.WriteLine($"Round: {round}");
       Console.WriteLine($"sk LOE: {sk.GetStr(16).ToLower()}");  //simula chiave segreta LOE
       Console.WriteLine($"pk LOE: {pk.ToCompressedPoint()}"); //simula PKLOE
       Console.WriteLine($"Firma BLS LOE: {sigma.ToCompressedPoint()}"); //simula FIRMA LOE
@@ -132,12 +108,8 @@ namespace TimeCryptor
       this.sigma = sigma;
     }
 
-    public void Set_PKLOE_FromWeb()
+    public G2 GetPkFromWeb()
     {
-      //RECUPERA LA CHIAVE DI ROUND
-      //Init(BLS12_381);
-      //ETHmode();
-
       //recupero la chiave pubblica della rete
       var url = $"https://api.drand.sh/{this.DrandNetworkHash}/info";
       var drandNetworkObj = GetData<DrandNetworkInfo>(url);
@@ -145,25 +117,29 @@ namespace TimeCryptor
 
       var pk = new G2();
       pk.Deserialize(CryptoUtils.FromHexStr(drandNetworkObj.public_key));
-      this.pk = pk;
+      return pk;
     }
 
-    public void SetSigmaFromWeb()
+    public G1? GetSigma(ulong? round=null)
     {
-      var url = $"https://api.drand.sh/{this.DrandNetworkHash}/public/{this.Round}";
-      Console.WriteLine($"{DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss")} -> recupero la firma LOE");
-      var drandBeaconObj = GetData<DrandBeaconInfo>(url);
-      if (drandBeaconObj != null)
+      if (this.KeyMode == KeyModeEnum.FromLocal) return sigma;
+      else 
       {
-        var sig = new G1();
-        sig.Deserialize(CryptoUtils.FromHexStr(drandBeaconObj.signature));
-        var check = VerifySign(this.Round, sig, (G2)this.pk);
-        this.sigma = sig;
-      }
-      else
-      {
-        Console.WriteLine($"{DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss")} -> firma LOE non disponibile!");
-        this.sigma = null;
+        if (round == null) throw new Exception("round missing!");
+        var url = $"https://api.drand.sh/{this.DrandNetworkHash}/public/{round}";
+        Console.WriteLine($"{DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss")} -> recupero la firma LOE");
+        var drandBeaconObj = GetData<DrandBeaconInfo>(url);
+        if (drandBeaconObj != null)
+        {
+          var sig = new G1();
+          sig.Deserialize(CryptoUtils.FromHexStr(drandBeaconObj.signature));
+          return sig;
+        }
+        else
+        {
+          Console.WriteLine($"{DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss")} -> firma LOE non disponibile!");
+          return null;
+        }
       }
     }
 
@@ -231,7 +207,7 @@ namespace TimeCryptor
       return retDate.DateTime.ToLocalTime();
     }
 
-  
+
   }
 
   public class DrandBeaconInfo

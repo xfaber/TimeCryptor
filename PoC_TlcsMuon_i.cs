@@ -1,10 +1,5 @@
-﻿
-using Org.BouncyCastle.Crypto.Parameters;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+﻿using Org.BouncyCastle.Crypto.Parameters;
 using static mcl.MCL;
-using static TimeCryptor.CryptoUtils;
-using static TimeCryptor.Test_TimelockZone;
 
 namespace TimeCryptor
 {
@@ -23,55 +18,64 @@ namespace TimeCryptor
       Console.WriteLine("=== PoC === TLCS Muon - versione interattiva - ===");
       Console.WriteLine("==================================================");
 
-      #region CONFIGURAZIONI GENERALI
+      #region CONFIGURAZIONI GENERALI 
       Console.WriteLine("\n=== CONFIGURAZIONI GENERALI ===");
       Init(BLS12_381);
       ETHmode();
+      #endregion
+
+      #region IMPOSTAZIONE PARAMETRI POC (MESSAGGIO DA CIFRARE, DATA FUTURA e RECUPERO DEL NUMERO DI ROUND)
       G1setDst("BLS_SIG_BLS12381G1_XMD:SHA-256_SSWU_RO_NUL_"); //DST da impostare in base alla chain drand da utilizzare 
       //G1setDst("BLS_SIG_BLS12381G2_XMD:SHA-256_SSWU_RO_NUL_"); //su alcune chain (quelle non conformi a RFC rfc9380) viene usato erroneamente un DST sbagliato, refuso post switch G1<->G2
+      var vm = verifyMode.NotInteractive;
+      var LOE_KeyMode = LeagueOfEntropy.KeyModeEnum.FromLocal;
+      
+      var message = "Hello TLE!";
+      var futureDateTime = DateTime.Now.AddSeconds(10); //blocco temporale 10 secondi
+      ulong round = LeagueOfEntropy.GetRound(futureDateTime);
+      Console.WriteLine($"Data futura impostata: {futureDateTime.ToString("dd/MM/yyyy HH:mm:ss")} round:{round}");
+      #endregion
 
-      _LOE = new LeagueOfEntropy(LeagueOfEntropy.KeyModeEnum.FromLocal);
+      #region ISTANZE CLASSI SPECIFICHE
+      
+      _LOE = new LeagueOfEntropy(LOE_KeyMode, round);
+      
       _blockChain = new Blockchain();
 
       //IMPOSTO LA CURVA ELLITTICA DA UTILIZZARE PER LA COPPIA DI CHIAVI DA GENERARE
       _globalParams = new GlobalParams(CryptoUtils.ECname.secp256k1);
       _globalParams.k = 5; //parametro di sicurezza per errore di solidità
       _globalParams.numeroContributori = 3;
+      _globalParams.PKLOE = _LOE.pk;
+
+      _contributors = new Contributor[_globalParams.numeroContributori];
+
+      IContributorsService servizio = new ContributorsService(_contributors);
+      _smartContract = new SmartContract(servizio);
       
+      Console.WriteLine($"keyMode: {LOE_KeyMode}");
       Console.WriteLine($"numeroContributori: {_globalParams.numeroContributori}");
       Console.WriteLine($"parametro di sicurezza k: {_globalParams.k}");
       Console.WriteLine($"Curva ellittica scelta: {_globalParams.ecCurveName}");
       #endregion
 
-      #region IMPOSTAZIONE MESSAGGIO DA CIFRARE, DATA FUTURA e RECUPERO DEL NUMERO DI ROUND
-      var message = "Hello TLE!";
-      var futureDateTime = DateTime.Now.AddSeconds(10); //blocco temporale 10 secondi
-      ulong round = LeagueOfEntropy.GetRound(futureDateTime);
-      Console.WriteLine($"Data futura impostata: {futureDateTime.ToString("dd/MM/yyyy HH:mm:ss")} round:{round}");
-      _LOE.Round = round;
-      _globalParams.PKLOE = (G2)_LOE.pk;
-      #endregion
-
       #region GENERAZIONE PARAMETRI PUBBLICI E PUBBLICAZIONE SULLA BLOCKCHAIN
-      Console.WriteLine("\n=== GENERAZIONE PARAMETRI PUBBLICI E PUBBLICAZIONE SULLA BLOCKCHAIN ===");
-      _contributors = new Contributor[_globalParams.numeroContributori];      
+      Console.WriteLine("\n=== GENERAZIONE PARAMETRI PUBBLICI E PUBBLICAZIONE SULLA BLOCKCHAIN ===");      
       for (int i = 1; i <= _globalParams.numeroContributori; i++)
       {
         var P = new Contributor($"P{i}", _globalParams.ecParams, _globalParams.k, round);
-        P.SetPublicParams(round, _globalParams.PKLOE);
+        P.SetPublicParams(round, _globalParams.PKLOE, vm);
 
-        var bHonestParty = false;
-        if (i == 2) bHonestParty = true; //simula un contributo non onesto
-        P.PublishToBlockchain(verifyMode.Interactive, _blockChain, bHonestParty);
+        var bHonestParty = true;
+        if (i == 2) bHonestParty = false; //simula un contributore non onesto
+        P.PublishToBlockchain(vm, _blockChain, bHonestParty);
         _contributors[i - 1] = P;
       }
       #endregion
 
       #region VERIFICA DELLE PROVE
-      Console.WriteLine("\n=== VERIFICA DELLE PROVE ===");
-      IContributorsService servizio = new ContributorsService(_contributors);
-      _smartContract = new SmartContract(servizio);
-      var verifiedContributorNameList = _smartContract.Verify(verifyMode.Interactive, round, _blockChain, _globalParams);
+      Console.WriteLine("\n=== VERIFICA DELLE PROVE ===");      
+      var verifiedContributorNameList = _smartContract.Verify(vm, round, _blockChain, _globalParams);
       #endregion
 
       #region AGGREGAZIONE - CALCOLO MPK_R
@@ -98,7 +102,7 @@ namespace TimeCryptor
       //if (sigmaLOE == null)  { Console.WriteLine($"SIGMA LOE non ancora disponibile! Attendere fino a {LeagueOfEntropy.GetDateFromRound(round).ToString("dd/MM/yyyy HH:mm:ss")}"); }
       while (sigmaLOE == null)
       {
-        sigmaLOE = _LOE.sigma; //richiede la firma 
+        sigmaLOE = _LOE.GetSigma(round); //richiede la firma 
         Console.WriteLine("...attendo...");
         Thread.Sleep(2000);
 

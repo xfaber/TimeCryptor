@@ -41,19 +41,21 @@ namespace TimeCryptor
     /// <returns></returns>
     /// <exception cref="Exception"></exception>
     public List<string> Verify(verifyMode vm, ulong round, Blockchain blockChain, GlobalParams globalParams)
-    {
+    {      
       //lista dei contributori validi, per cui la verifica delle prove ha dato esito positivo
       var verifiedContributorNameList = new List<string>();
       //Recupera i dati dei parametri pubblici pubblicati dai contributori sulla blockchain 
       var bcRoundItemList = blockChain.PopByRound(round);
       foreach (var bcRoundItem in bcRoundItemList)
       {
+        Console.WriteLine($"--Verifica prova di {bcRoundItem.contributorName}--");
         int[] rndBitArray;
         if (vm == verifyMode.Interactive)
           rndBitArray = ChooseRandomBitArray(globalParams.k);
         else
           rndBitArray = GetRandomArrayForProof(bcRoundItem, globalParams.k);
 
+        Console.WriteLine($"Random bit array: {String.Join(',',rndBitArray)}");
         var check = false;
         for (int j = 0; j < globalParams.k; j++)
         {
@@ -79,7 +81,7 @@ namespace TimeCryptor
           if (vm == verifyMode.Interactive)
           {
             //Simula l'interazione tra verifier e prover - il verifier richiede al prover il parametro privato t della prova che vuole verificare (in base al valore casuale da lui scelto nell'array di bit rndBitArray)
-            Console.WriteLine("Chiama il servizio per recuperare il parametro t dal contributore");
+            Console.WriteLine($"Chiama il servizio per recuperare il parametro t dal contributore {bcRoundItem.contributorName} per {j} di k {(rndBitArray[j]==1?"right":"left")}");
             tupleToBeVerify.t = _servizio.Get_t_fromContributor(bcRoundItem.contributorName, j, rndBitArray[j]);
           }
 
@@ -91,7 +93,7 @@ namespace TimeCryptor
         if (check) verifiedContributorNameList.Add(bcRoundItem.contributorName);
         Console.WriteLine($"Parte {bcRoundItem.contributorName} - Prova {((check) ? "valida" : "NON valida!")}");
       }
-      Console.WriteLine($"Parti valide {verifiedContributorNameList.Count}/{globalParams.numeroContributori}");
+      Console.WriteLine($"Parti valide: {verifiedContributorNameList.Count}/{globalParams.numeroContributori}");
       return verifiedContributorNameList;
     }
 

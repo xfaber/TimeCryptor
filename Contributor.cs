@@ -7,17 +7,17 @@ namespace TimeCryptor
 {
   public class Contributor
   {
-    private int k { get; set; }
-    private ulong round { get; set; }
-    public string Name { get; set; }
     public ECDomainParameters ecParams { get; set; }
-
-    private BigInteger sk { get; set; }
-        
-    public PK_T_y_Item pp { get; set; }
+    private int k { get; set; }
     
-    public int[] b { get; set; } // contenente l'array dei bit di casualità per la verifica delle prove
+    public string Name { get; set; }
+    private BigInteger sk { get; set; }
+    private int[] b { get; set; } // contenente l'array dei bit di casualità per la verifica delle prove
+    
+    private ulong round { get; set; }
+    public PK_T_y_Item pp { get; set; }
     public Proof_Item[] proof { get; set; }
+    
     public Contributor(string contributorName, ECDomainParameters ecDomainParameters, int k, ulong round)
     {
       this.ecParams = ecDomainParameters;
@@ -121,7 +121,7 @@ namespace TimeCryptor
       bc.Put(item);
     }
 
-    public void SetPublicParams(ulong round, G2 PKLOE)
+    public void SetPublicParams(ulong round, G2 PKLOE, verifyMode vm)
     {
       Console.WriteLine($"\n=== Creazione parametri pubblici della Parte {this.Name} ===");
       //var array_b_string = "";
@@ -159,6 +159,12 @@ namespace TimeCryptor
         this.proof[j] = new Proof_Item();
         this.proof[j].left = GetPK_T_y(round, PKLOE, array_sk[0]);
         this.proof[j].right = GetPK_T_y(round, PKLOE, array_sk[1]);
+      }
+
+      if (vm == verifyMode.NotInteractive)
+      {
+        //Crea l'array b dall'hash della stringa [〖PK,(〖PK〗_(j,b),T_(j,b),y_(j,b) )〗_(j∈[k],b∈{1,2} )]. 
+        this.b = GetRandomArrayForProof(this.k);
       }
     }
     
