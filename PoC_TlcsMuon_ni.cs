@@ -1,9 +1,10 @@
 ﻿using Org.BouncyCastle.Crypto.Parameters;
+using TimeCryptor.Classes;
 using static mcl.MCL;
 
 namespace TimeCryptor
 {
-  public static class PoC_TlcsMuon_ni
+    public static class PoC_TlcsMuon_ni
   {
     static LeagueOfEntropy _LOE;
     static Blockchain _blockChain;

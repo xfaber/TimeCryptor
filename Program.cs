@@ -10,11 +10,11 @@
 
       //PoC_TlcsMuon_i.Run_PoC();       //Esegue il protocollo TLCS Muon in versione interattiva
 
-      PoC_TlcsMuon_ni.Run_PoC();    //Esegue il protocollo TLCS Muon in versione NON interattiva
+      //PoC_TlcsMuon_ni.Run_PoC();    //Esegue il protocollo TLCS Muon in versione NON interattiva
 
       //TEST VARI
 
-      //Test_TimelockZone.Run_Test_ValidationKeys();
+      Test_TimelockZone.Run_Test_ValidationKeys();
 
       //Test_MCLlibrary.Run_Test_Pairing_BLS12_381();
       //Test_MCLlibrary.Run_Test_SerializeDeserialize();

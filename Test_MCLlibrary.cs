@@ -4,12 +4,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TimeCryptor.Classes;
 using static mcl.MCL;
 using static Org.BouncyCastle.Asn1.Cmp.Challenge;
 
 namespace TimeCryptor
 {
-  internal class Test_MCLlibrary
+    internal class Test_MCLlibrary
   {
 
     static int err = 0;

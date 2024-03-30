@@ -1,0 +1,102 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="NameAndType">
+  <Class Name="TimeCryptor.Classes.Blockchain">
+    <Position X="13.25" Y="2.75" Width="3" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAQACAAAAAAAAAAAAAAAAIAAAAAAAAAAAAg=</HashCode>
+      <FileName>Classes\Blockchain.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TimeCryptor.Classes.Blockchain_Item">
+    <Position X="13.75" Y="5.25" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAACAAAAAAQAAAgAAQAAAAAA=</HashCode>
+      <FileName>Classes\Blockchain.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TimeCryptor.Classes.Contributor">
+    <Position X="10.5" Y="2.75" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AABAAAAAAAAACAAAAIAAAASAAAAAAAgAgwAAQBAAAAA=</HashCode>
+      <FileName>Classes\Contributor.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TimeCryptor.Classes.GlobalParams">
+    <Position X="7.75" Y="2.75" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAQAAAAAAAAAIAAAAAAAAEACAAAgAAAAAAAAAA=</HashCode>
+      <FileName>Classes\GlobalParams.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TimeCryptor.Classes.LeagueOfEntropy">
+    <Position X="5" Y="2.75" Width="2.5" />
+    <NestedTypes>
+      <Enum Name="TimeCryptor.Classes.LeagueOfEntropy.KeyModeEnum" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Classes\LeagueOfEntropy.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAIAAAAIEkAAAAAAAAAAEAAAAAAAAIAQAAAAADBAAAI=</HashCode>
+      <FileName>Classes\LeagueOfEntropy.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TimeCryptor.Classes.DrandBeaconInfo">
+    <Position X="4.5" Y="7.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAQAAAAAAAAAAAAAAAAAQAAAAAAAAAgAAAAAAAAA=</HashCode>
+      <FileName>Classes\LeagueOfEntropy.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TimeCryptor.Classes.DrandNetworkInfo">
+    <Position X="6.5" Y="7.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAQAAEAAAAAAAAAChAAAAAAAAAAAAAAAAAAAAgAAAAg=</HashCode>
+      <FileName>Classes\LeagueOfEntropy.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TimeCryptor.Classes.Metadata">
+    <Position X="4.5" Y="9.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Classes\LeagueOfEntropy.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TimeCryptor.Classes.SmartContract">
+    <Position X="16.5" Y="2.75" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAUAEAIAAAQAAAAAABAACAAAAAAAAgAAIAAAAAAA=</HashCode>
+      <FileName>Classes\SmartContract.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TimeCryptor.Classes.Proof_Item">
+    <Position X="20.5" Y="3" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAgAA=</HashCode>
+      <FileName>Classes\Proof_Item.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TimeCryptor.Classes.PK_T_y_Item">
+    <Position X="20" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgCAAEAAA=</HashCode>
+      <FileName>Classes\PK_T_y_Item.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TimeCryptor.Classes.PK_T_y_ItemExtended">
+    <Position X="22" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAA=</HashCode>
+      <FileName>Classes\PK_T_y_ItemExtended.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Enum Name="TimeCryptor.Classes.verifyMode">
+    <Position X="17" Y="6.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAABAAAAA=</HashCode>
+      <FileName>Classes\GlobalParams.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
