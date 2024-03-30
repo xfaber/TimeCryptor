@@ -22,11 +22,11 @@ namespace TimeCryptor
       Console.WriteLine("\n=== CONFIGURAZIONI GENERALI ===");
       Init(BLS12_381);
       ETHmode();
+      G1setDst("BLS_SIG_BLS12381G1_XMD:SHA-256_SSWU_RO_NUL_"); //DST da impostare in base alla chain drand da utilizzare 
+      //G1setDst("BLS_SIG_BLS12381G2_XMD:SHA-256_SSWU_RO_NUL_"); //su alcune chain (quelle non conformi a RFC rfc9380) viene usato erroneamente un DST sbagliato, refuso post switch G1<->G2
       #endregion
 
       #region IMPOSTAZIONE PARAMETRI POC (MESSAGGIO DA CIFRARE, DATA FUTURA e RECUPERO DEL NUMERO DI ROUND)
-      G1setDst("BLS_SIG_BLS12381G1_XMD:SHA-256_SSWU_RO_NUL_"); //DST da impostare in base alla chain drand da utilizzare 
-      //G1setDst("BLS_SIG_BLS12381G2_XMD:SHA-256_SSWU_RO_NUL_"); //su alcune chain (quelle non conformi a RFC rfc9380) viene usato erroneamente un DST sbagliato, refuso post switch G1<->G2
       var vm = verifyMode.NotInteractive;
       var LOE_KeyMode = LeagueOfEntropy.KeyModeEnum.FromLocal;
       
@@ -36,7 +36,7 @@ namespace TimeCryptor
       Console.WriteLine($"Data futura impostata: {futureDateTime.ToString("dd/MM/yyyy HH:mm:ss")} round:{round}");
       #endregion
 
-      #region ISTANZE CLASSI SPECIFICHE
+      #region ISTANZE DELLE CLASSI SPECIFICHE
       
       _LOE = new LeagueOfEntropy(LOE_KeyMode, round);
       
