@@ -216,7 +216,7 @@ namespace TimeCryptor
       var round = LeagueOfEntropy.GetRound(futureDateTime);
       Console.WriteLine($"Data futura impostata: {futureDateTime.ToString("dd/MM/yyyy HH:mm:ss")} round:{round}");
 
-      var LOE = new LeagueOfEntropy(LeagueOfEntropy.KeyModeEnum.FromLocal,round);
+      var LOE = new LeagueOfEntropy(LeagueOfEntropy.ReqDataModeEnum.FromLocal,round);
       var sigmaLOE = LOE.GetSigma(round);
       while (sigmaLOE == null)
       {

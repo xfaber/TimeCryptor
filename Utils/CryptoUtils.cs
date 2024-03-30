@@ -320,22 +320,10 @@ namespace TimeCryptor
       return new ECDomainParameters(curve, generatorPoint, n, h);
     }
 
-    /// <summary>
-    /// parametri curva ellettica secp256k1 impostati tramite il nome della curva
+    /// <summary>    
+    /// Genera un coppia di chiavi asimmetriche in base ai parametri della curva ellittica assati
     /// </summary>
-    /// <returns></returns>
-    public static ECDomainParameters ecDomainParametersBuiltIn(string curveName)
-    {
-      X9ECParameters ecParams = ECNamedCurveTable.GetByName(curveName);
-      var domainParams = new ECDomainParameters(ecParams);
-      return domainParams;
-    }
-
-    /// <summary>
-    /// Once we have our elliptic curve parameters we are ready to generate a pair of asymmetric keys.
-    /// Generating keys and key agreement
-    /// </summary>
-    /// <param name="ecParams"></param>
+    /// <param name="ecParams">Parametri della curva ellittica</param>
     /// <returns></returns>
     public static AsymmetricCipherKeyPair generateECDHKeyPair(ECDomainParameters ecParams)
     {
@@ -358,9 +346,7 @@ namespace TimeCryptor
 
       return result;
     }
-
     #endregion
-
 
     /// <summary>
     /// Genera una stringa casuale
@@ -449,7 +435,6 @@ namespace TimeCryptor
       var prime = Primes.GenerateSTRandomPrime(digester, bitLength, seed);
       return prime.Prime;
     }
-
 
     private static void printBigInt(string s)
     {
@@ -677,9 +662,6 @@ namespace TimeCryptor
 
     #endregion
 
-
-
-    
 
     #region Cifratura con classi .Net Core (System.Security.Cryptography)
 

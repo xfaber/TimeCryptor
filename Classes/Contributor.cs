@@ -70,7 +70,7 @@ namespace TimeCryptor.Classes
             return new PK_T_y_ItemExtended() { PK = PK, T = T, y = y, t = t };
         }
 
-        public void PublishToBlockchain(verifyMode vm, Blockchain bc, bool bHonestParty = true)
+        public void PublishToBlockchain(VerifyModeEnum vm, Blockchain bc, bool bHonestParty = true)
         {
             var item = new Blockchain_Item();
             item.round = round;
@@ -84,7 +84,7 @@ namespace TimeCryptor.Classes
 
                 // Nella verifica non interattiva viene pubblicato già il valore di t che lo smartcontract dovrà verificare
                 // perchè i valori casuali dell'array b vengono determinati dalla funzione hash che fa da oracolo
-                if (vm == verifyMode.NotInteractive)
+                if (vm == VerifyModeEnum.NotInteractive)
                 {
                     //In base ai valori dell'array di casualità b calcolato da Utils.GetRandomArrayForProof che implementa l'euristica di Fiat-Shamir
                     switch (b[i])
@@ -121,7 +121,7 @@ namespace TimeCryptor.Classes
             bc.Put(item);
         }
 
-        public void SetPublicParams(ulong round, G2 PKLOE, verifyMode vm)
+        public void SetPublicParams(ulong round, G2 PKLOE, VerifyModeEnum vm)
         {
             Console.WriteLine($"\n=== Creazione parametri pubblici della Parte {Name} ===");
             //var array_b_string = "";
@@ -161,7 +161,7 @@ namespace TimeCryptor.Classes
                 proof[j].right = GetPK_T_y(round, PKLOE, array_sk[1]);
             }
 
-            if (vm == verifyMode.NotInteractive)
+            if (vm == VerifyModeEnum.NotInteractive)
             {
                 //Crea l'array b dall'hash della stringa [〖PK,(〖PK〗_(j,b),T_(j,b),y_(j,b) )〗_(j∈[k],b∈{1,2} )]. 
                 b = GetRandomArrayForProof(k);

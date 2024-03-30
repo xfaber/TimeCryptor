@@ -220,7 +220,4 @@ namespace TimeCryptor
       return ret;
     }
   }
-
-  
-
 }

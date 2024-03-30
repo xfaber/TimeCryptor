@@ -27,8 +27,8 @@ namespace TimeCryptor
       #region IMPOSTAZIONE PARAMETRI POC (MESSAGGIO DA CIFRARE, DATA FUTURA e RECUPERO DEL NUMERO DI ROUND)
       G1setDst("BLS_SIG_BLS12381G1_XMD:SHA-256_SSWU_RO_NUL_"); //DST da impostare in base alla chain drand da utilizzare 
       //G1setDst("BLS_SIG_BLS12381G2_XMD:SHA-256_SSWU_RO_NUL_"); //su alcune chain (quelle non conformi a RFC rfc9380) viene usato erroneamente un DST sbagliato, refuso post switch G1<->G2
-      var vm = verifyMode.NotInteractive;
-      var LOE_KeyMode = LeagueOfEntropy.KeyModeEnum.FromLocal;
+      var MUON_VerifyMode = VerifyModeEnum.NotInteractive;
+      var LOE_ReqDataMode = LeagueOfEntropy.ReqDataModeEnum.FromLocal;
       
       var message = "Hello TLE!";
       var futureDateTime = DateTime.Now.AddSeconds(10);
@@ -36,9 +36,9 @@ namespace TimeCryptor
       Console.WriteLine($"Data futura impostata: {futureDateTime.ToString("dd/MM/yyyy HH:mm:ss")} round:{round}");
       #endregion
 
-      #region ISTANZE CLASSI SPECIFICHE
+      #region ISTANZE DELLE CLASSI SPECIFICHE
       
-      _LOE = new LeagueOfEntropy(LOE_KeyMode, round);
+      _LOE = new LeagueOfEntropy(LOE_ReqDataMode, round);
 
       _blockChain = new Blockchain();
 
@@ -54,7 +54,7 @@ namespace TimeCryptor
       _smartContract = new SmartContract(servizio);
 
       Console.WriteLine("\n=== CONFIGURAZIONI GENERALI ===");
-      Console.WriteLine($"keyMode: {LOE_KeyMode}");
+      Console.WriteLine($"keyMode: {LOE_ReqDataMode}");
       Console.WriteLine($"numeroContributori: {_globalParams.numeroContributori}");
       Console.WriteLine($"parametro di sicurezza k: {_globalParams.k}");
       Console.WriteLine($"Curva ellittica scelta: {_globalParams.ecCurveName}");
@@ -65,18 +65,18 @@ namespace TimeCryptor
       for (int i = 1; i <= _globalParams.numeroContributori; i++)
       {
         var P = new Contributor($"P{i}", _globalParams.ecParams, _globalParams.k, round);
-        P.SetPublicParams(round, _globalParams.PKLOE, vm);
+        P.SetPublicParams(round, _globalParams.PKLOE, MUON_VerifyMode);
 
         var bHonestParty = false;
         if (i == 2) bHonestParty = true;//simula un contributo non onesto
-        P.PublishToBlockchain(vm, _blockChain, bHonestParty);
+        P.PublishToBlockchain(MUON_VerifyMode, _blockChain, bHonestParty);
         _contributors[i - 1] = P;
       }
       #endregion
 
       #region VERIFICA DELLE PROVE
       Console.WriteLine("\n=== VERIFICA DELLE PROVE ===");
-      var verifiedContributorNameList = _smartContract.Verify(vm, round, _blockChain, _globalParams);
+      var verifiedContributorNameList = _smartContract.Verify(MUON_VerifyMode, round, _blockChain, _globalParams);
       #endregion
 
       #region AGGREGAZIONE - CALCOLO MPK_R
@@ -86,11 +86,13 @@ namespace TimeCryptor
 
       #region CIFRATURA
       Console.WriteLine($"\n=== CIFRATURA CON LA CHIAVE MPK_R ===");
+      
       //CARICA LA CHIAVE PUBBLICA DEL DESTINATARIO
       var publicKeyParameters = new ECPublicKeyParameters(MPK_R, _globalParams.ecParams);
 
       //GENERA LA COPPIA DI CHIAVI DEL MITTENTE
       var keyPairSender = ECIES.GenerateECIESKeyPair(_globalParams.ecParams);
+      
       var cipherText = ECIES.Encrypt(message, keyPairSender.Private, publicKeyParameters);
       var cipherTextString = Convert.ToBase64String(cipherText);
       Console.WriteLine($"Testo originale: {message}");

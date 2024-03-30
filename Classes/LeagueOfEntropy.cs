@@ -9,21 +9,21 @@ namespace TimeCryptor.Classes
 {
     public class LeagueOfEntropy
     {
-        public enum KeyModeEnum
+        public enum ReqDataModeEnum
         {
             FromWeb, //recupera chiave PK e firma BLS dal servizio rest api su internet
             FromLocal //crea chiavi firma con chiavi generate in locale
         }
-        public LeagueOfEntropy(KeyModeEnum keyMode, ulong? round = null, string drandNetworkHash = "52db9ba70e0cc0f6eaf7803dd07447a1f5477735fd3f661792ba94600c84e971")
+        public LeagueOfEntropy(ReqDataModeEnum reqDataMode, ulong? round = null, string drandNetworkHash = "52db9ba70e0cc0f6eaf7803dd07447a1f5477735fd3f661792ba94600c84e971")
         {
-            if (keyMode == KeyModeEnum.FromLocal && round == null) throw new Exception("round missing");
+            if (reqDataMode == ReqDataModeEnum.FromLocal && round == null) throw new Exception("round missing");
             DrandNetworkHash = drandNetworkHash;
-            KeyMode = keyMode;
-            if (keyMode == KeyModeEnum.FromLocal) Set_LOE_Data_FromLocal((ulong)round);
+            KeyMode = reqDataMode;
+            if (reqDataMode == ReqDataModeEnum.FromLocal) Set_LOE_Data_FromLocal((ulong)round);
             else pk = GetPkFromWeb();
         }
 
-        public KeyModeEnum KeyMode { get; private set; }
+        public ReqDataModeEnum KeyMode { get; private set; }
         public G2 pk { get; set; }
 
         private Fr sk { get; set; }
@@ -122,7 +122,7 @@ namespace TimeCryptor.Classes
 
         public G1? GetSigma(ulong? round = null)
         {
-            if (KeyMode == KeyModeEnum.FromLocal) return sigma;
+            if (KeyMode == ReqDataModeEnum.FromLocal) return sigma;
             else
             {
                 if (round == null) throw new Exception("round missing!");

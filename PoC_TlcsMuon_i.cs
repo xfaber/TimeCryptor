@@ -28,8 +28,8 @@ namespace TimeCryptor
       #endregion
 
       #region IMPOSTAZIONE PARAMETRI POC (MESSAGGIO DA CIFRARE, DATA FUTURA e RECUPERO DEL NUMERO DI ROUND)
-      var vm = verifyMode.NotInteractive;
-      var LOE_KeyMode = LeagueOfEntropy.KeyModeEnum.FromLocal;
+      var MUON_VerifyMode = VerifyModeEnum.Interactive;
+      var LOE_ReqDataMode = LeagueOfEntropy.ReqDataModeEnum.FromLocal;
       
       var message = "Hello TLE!";
       var futureDateTime = DateTime.Now.AddSeconds(10); //blocco temporale 10 secondi
@@ -39,7 +39,7 @@ namespace TimeCryptor
 
       #region ISTANZE DELLE CLASSI SPECIFICHE
       
-      _LOE = new LeagueOfEntropy(LOE_KeyMode, round);
+      _LOE = new LeagueOfEntropy(LOE_ReqDataMode, round);
       
       _blockChain = new Blockchain();
 
@@ -54,7 +54,7 @@ namespace TimeCryptor
       IContributorsService servizio = new ContributorsService(_contributors);
       _smartContract = new SmartContract(servizio);
       
-      Console.WriteLine($"keyMode: {LOE_KeyMode}");
+      Console.WriteLine($"keyMode: {LOE_ReqDataMode}");
       Console.WriteLine($"numeroContributori: {_globalParams.numeroContributori}");
       Console.WriteLine($"parametro di sicurezza k: {_globalParams.k}");
       Console.WriteLine($"Curva ellittica scelta: {_globalParams.ecCurveName}");
@@ -65,18 +65,18 @@ namespace TimeCryptor
       for (int i = 1; i <= _globalParams.numeroContributori; i++)
       {
         var P = new Contributor($"P{i}", _globalParams.ecParams, _globalParams.k, round);
-        P.SetPublicParams(round, _globalParams.PKLOE, vm);
+        P.SetPublicParams(round, _globalParams.PKLOE, MUON_VerifyMode);
 
         var bHonestParty = true;
         if (i == 2) bHonestParty = false; //simula un contributore non onesto
-        P.PublishToBlockchain(vm, _blockChain, bHonestParty);
+        P.PublishToBlockchain(MUON_VerifyMode, _blockChain, bHonestParty);
         _contributors[i - 1] = P;
       }
       #endregion
 
       #region VERIFICA DELLE PROVE
       Console.WriteLine("\n=== VERIFICA DELLE PROVE ===");      
-      var verifiedContributorNameList = _smartContract.Verify(vm, round, _blockChain, _globalParams);
+      var verifiedContributorNameList = _smartContract.Verify(MUON_VerifyMode, round, _blockChain, _globalParams);
       #endregion
 
       #region AGGREGAZIONE - CALCOLO MPK_R
@@ -97,27 +97,14 @@ namespace TimeCryptor
       Console.WriteLine($"Blocco temporale fino a : {futureDateTime.ToString("dd/MM/yyyy HH:mm:ss")}");
       #endregion
 
-      #region RECUPERO LA FIRMA LOE
+      #region RECUPERO DELLA FIRMA LOE
       Console.WriteLine("\n=== RECUPERO LA FIRMA LOE ===");
       G1? sigmaLOE = null;
-      //if (sigmaLOE == null)  { Console.WriteLine($"SIGMA LOE non ancora disponibile! Attendere fino a {LeagueOfEntropy.GetDateFromRound(round).ToString("dd/MM/yyyy HH:mm:ss")}"); }
       while (sigmaLOE == null)
       {
         sigmaLOE = _LOE.GetSigma(round); //richiede la firma 
-        Console.WriteLine("...attendo...");
+        Console.WriteLine($"{DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss")} -> firma LOE non disponibile, attendo...");
         Thread.Sleep(2000);
-
-        /*
-        if (DateTime.Now >= LeagueOfEntropy.GetDateFromRound(round))
-        {
-          sigmaLOE = _LOE.sigma; //richiede la firma 
-        }
-        else
-        {
-          Console.WriteLine($"{DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss")} -> firma LOE non disponibile, attendo...");
-          Thread.Sleep(1000);
-        } 
-        */
       }
       Console.WriteLine("...FIRMA LOE DISPONIBILE!");
       Console.WriteLine($"{((G1)sigmaLOE).GetStr(16)}");
