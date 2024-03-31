@@ -131,6 +131,7 @@ namespace TimeCryptor
       
       var plainText = ECIES.Decrypt(cipherText, keyPairSender.Public, privateKeyParameters);
       Console.WriteLine($"Testo decifrato: {plainText}");
+      Console.WriteLine($"Testo decifrato: plainText==message? {(plainText == message ? "YES" : "NO!")}");
       #endregion
     }
   }

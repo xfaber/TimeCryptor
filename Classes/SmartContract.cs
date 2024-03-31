@@ -174,9 +174,8 @@ namespace TimeCryptor.Classes
     public BigInteger Invert(ulong round, G1 sigmaLOE, Blockchain bc, GlobalParams globalParams)
     {
       //Recupero i parametri dalla blockChain
-      var bcRoundItemList = bc.Items.Where(s => s.round == round).ToList();
-      var array_sk = new BigInteger[bcRoundItemList.Count];
-      var i = 0;
+      var bcRoundItemList = bc.PopByRound(round);
+      var verifiedSkList = new List<BigInteger>();
       foreach (var bcRoundItem in bcRoundItemList)
       {
         Console.WriteLine($"\n=== RICOSTRUZIONE CHIAVE SEGRETA PARZIALE PARTE {bcRoundItem.contributorName} ===");
@@ -193,11 +192,15 @@ namespace TimeCryptor.Classes
           var checkPKsum = bcRoundItem.pp.PK.Equals(PKj_sum);
 
           var skj = sk1.Add(sk2).Mod(globalParams.ecParams.N);
-          CryptoUtils.CheckValidKeyPair(bcRoundItem.pp.PK, skj, globalParams.ecParams); //verifica la validita della coppia di chiavi generate per il round
-          if (checkPK && checkPKsum)
+
+          //verifica la validita della coppia di chiavi generate per il round (qui si deve avere bcRoundItem.pp.PK = PKj_sum)
+          //questa riga di controllo è aggiuntiva, non è prevista dal protocollo descritto nel paper
+          CryptoUtils.CheckValidKeyPair(bcRoundItem.pp.PK, skj, globalParams.ecParams); 
+
+          if (checkPK && checkPKsum)  //Controllo (4) vedi paragrafo 3.4.3.3 tesi
           {
             Console.WriteLine($"{bcRoundItem.contributorName} sk (tlcs): {skj.ToString(16).ToLower()} (chiave segreta ricostruita)");
-            array_sk[i++] = skj;
+            verifiedSkList.Add(skj);
             check = true;
             break;
           }
@@ -207,10 +210,10 @@ namespace TimeCryptor.Classes
 
       Console.WriteLine("\n=== AGGREGA LE CHIAVI PRIVATE PARZIALI DELLE PARTI ===");
       //aggrega le chiavi private parziali ricostruite di tutte le parti (i contributori) per ricostruire la chiave segreta sk_r
-      var sk_r = array_sk[0];
-      for (i = 1; i <= array_sk.Length - 1; i++)
+      var sk_r = BigInteger.Zero;
+      foreach (var sk in verifiedSkList)
       {
-        if (array_sk[i] != null) sk_r = sk_r.Add(array_sk[i]).Mod(globalParams.ecParams.N);
+        sk_r = sk_r.Add(sk).Mod(globalParams.ecParams.N);
       }
       return sk_r;
     }

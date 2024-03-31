@@ -112,7 +112,7 @@ namespace TimeCryptor.Classes
         {
             //recupero la chiave pubblica della rete
             var url = $"https://api.drand.sh/{DrandNetworkHash}/info";
-            var drandNetworkObj = GetData<DrandNetworkInfo>(url);
+            var drandNetworkObj = GetDataFromAPI<DrandNetworkInfo>(url);
             if (drandNetworkObj == null) throw new Exception($"getPublicKey from drand network with hash {DrandNetworkHash} error!");
 
             var pk = new G2();
@@ -120,30 +120,36 @@ namespace TimeCryptor.Classes
             return pk;
         }
 
-        public G1? GetSigma(ulong? round = null)
+        public G1? GetSigma(ulong round)
         {
-            if (KeyMode == ReqDataModeEnum.FromLocal) return sigma;
-            else
-            {
-                if (round == null) throw new Exception("round missing!");
-                var url = $"https://api.drand.sh/{DrandNetworkHash}/public/{round}";
-                Console.WriteLine($"{DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss")} -> recupero la firma LOE");
-                var drandBeaconObj = GetData<DrandBeaconInfo>(url);
-                if (drandBeaconObj != null)
-                {
-                    var sig = new G1();
-                    sig.Deserialize(CryptoUtils.FromHexStr(drandBeaconObj.signature));
-                    return sig;
-                }
-                else
-                {
-                    Console.WriteLine($"{DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss")} -> firma LOE non disponibile!");
-                    return null;
-                }
-            }
+      if (KeyMode == ReqDataModeEnum.FromLocal)
+      { 
+        if (DateTime.Now>GetDateFromRound(round))
+          return sigma;
+        else 
+          return null;
+      }
+      else
+      {
+        if (round == null) throw new Exception("round missing!");
+        var url = $"https://api.drand.sh/{DrandNetworkHash}/public/{round}";
+        Console.WriteLine($"{DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss")} -> recupero la firma LOE");
+        var drandBeaconObj = GetDataFromAPI<DrandBeaconInfo>(url);
+        if (drandBeaconObj != null)
+        {
+          var sig = new G1();
+          sig.Deserialize(CryptoUtils.FromHexStr(drandBeaconObj.signature));
+          return sig;
+        }
+        else
+        {
+          Console.WriteLine($"{DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss")} -> firma LOE non disponibile!");
+          return null;
+        }
+      }
         }
 
-        public static T GetData<T>(string url) where T : class
+        public static T GetDataFromAPI<T>(string url) where T : class
         {
             var client = new HttpClient();
             client.BaseAddress = new Uri(url);
@@ -211,7 +217,7 @@ namespace TimeCryptor.Classes
         {
             var url = $"https://api.drand.sh/{DrandNetworkHash}/public/latest";
 
-            var drandBeaconObj = GetData<DrandBeaconInfo>(url);
+            var drandBeaconObj = GetDataFromAPI<DrandBeaconInfo>(url);
 
             return drandBeaconObj.round;
         }

@@ -67,8 +67,8 @@ namespace TimeCryptor
         var P = new Contributor($"P{i}", _globalParams.ecParams, _globalParams.k, round);
         P.SetPublicParams(round, _globalParams.PKLOE, MUON_VerifyMode);
 
-        var bHonestParty = false;
-        if (i == 2) bHonestParty = true;//simula un contributo non onesto
+        var bHonestParty = false; //permette di simulare un contributore non onesto, se bHonestParty=false il contributore pubblicherà una chiave falsa, non coerente con le prove
+        if (i == 2) bHonestParty = true;
         P.PublishToBlockchain(MUON_VerifyMode, _blockChain, bHonestParty);
         _contributors[i - 1] = P;
       }
@@ -106,7 +106,7 @@ namespace TimeCryptor
       while (sigmaLOE == null)
       {
         Console.WriteLine($"{DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss")} -> firma LOE non disponibile, attendo...");
-        Thread.Sleep(1000);
+        Thread.Sleep(2000);
         sigmaLOE = _LOE.GetSigma(round);
       }
       Console.WriteLine("...FIRMA LOE DISPONIBILE!");
@@ -116,6 +116,7 @@ namespace TimeCryptor
 
       #region INVERSIONE - CALCOLO DI sk_R
       Console.WriteLine("\n=== INVERSIONE - CALCOLO DI sk_R ===");
+      
       Console.Write("\n=== VERIFICA FIRMA LOE ===");
       var checkFirmaLOE = LeagueOfEntropy.VerifySign(round, (G1)sigmaLOE, _globalParams.PKLOE);
       if (!checkFirmaLOE) throw new Exception("Firma LOE non valida!");
@@ -140,6 +141,7 @@ namespace TimeCryptor
 
       var plainText = ECIES.Decrypt(cipherText, keyPairSender.Public, privateKeyParameters);
       Console.WriteLine($"Testo decifrato: {plainText}");
+      Console.WriteLine($"Testo decifrato: plainText==message? {(plainText==message?"YES":"NO!")}"); 
       #endregion
     }
   }
