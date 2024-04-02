@@ -55,7 +55,7 @@ Implementa ll protocollo TLCS “muon” in versione interattiva
 Per lanciare l'esecuzione della PoC chiamare il metodo `Run_PoC()`
 
 ```plaintext
-PoC_TlcsMuon_ni.Run_PoC()
+PoC_TlcsMuon_i.Run_PoC()
 ```
 
 ### PoC del protocollo ![](https://github.com/xfaber/TimeCryptor/blob/master/images/muon_ni.svg)
