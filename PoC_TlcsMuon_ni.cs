@@ -67,8 +67,8 @@ namespace TimeCryptor
         var P = new Contributor($"P{i}", _globalParams.ecParams, _globalParams.k, round);
         P.SetPublicParams(round, _globalParams.PKLOE, MUON_VerifyMode);
 
-        var bHonestParty = false; //permette di simulare un contributore non onesto, se bHonestParty=false il contributore pubblicherà una chiave falsa, non coerente con le prove
-        if (i == 2) bHonestParty = true;
+        var bHonestParty = true; //permette di simulare un contributore non onesto, se bHonestParty=false il contributore pubblicherà una chiave falsa, non coerente con le prove
+        if (i == 2) bHonestParty = false;
         P.PublishToBlockchain(MUON_VerifyMode, _blockChain, bHonestParty);
         _contributors[i - 1] = P;
       }

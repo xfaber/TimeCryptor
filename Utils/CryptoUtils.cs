@@ -128,7 +128,7 @@ namespace TimeCryptor
       , [Description("P-384")]
       P_384
       , [Description("P-521")]
-      P521
+      P_521
       , secp112r1
       , secp112r2
       , secp128r1

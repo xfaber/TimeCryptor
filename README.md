@@ -2,28 +2,29 @@
 
 Progetto che implementa una serie di prove di concetto (Proof Of Concept) di protocolli Time Lock Encryption.
 
-Le prove di concetto sono finalizzate alla verifica della corretta funzionalità dei protocolli 
+Le prove di concetto sono finalizzate alla verifica della corretta funzionalità dei protocolli  
 e permettono di avere un approccio pratico su come affrontare le diverse problematiche che si possono incontrare durante l'implementazione di questi protocolli.
 
-=======================================================
+\=======================================================
 
-La solution Visual Studio contiene una applicazione console.
-Attraverso il metodo Main della classe Program è possibile richiamare l’esecuzione di ognuna delle PoC sviluppate. 
-Ogni prototipo è stato racchiuso in una classe statica denominata con il prefisso “PoC_[nome protocollo] “:
+La solution Visual Studio contiene una applicazione console.  
+Attraverso il metodo Main della classe Program è possibile richiamare l’esecuzione di ognuna delle PoC sviluppate.  
+Ogni prototipo è stato racchiuso in una classe statica denominata con il prefisso “PoC\_"+\[nome protocollo\] nomenclatura utilizzata anche per il rispettivo file .cs.
 
-•	PoC_TLP.cs
-•	PoC_TlcsMuon_i.cs
-•	PoC_TlcsMuon_ni.cs
+*   `PoC_TLP`
+*   `PoC_TlcsMuon_i`
+*   `PoC_TlcsMuon_ni`
 
-Ciascuna di queste classi statiche espone il metodo Run_PoC(), che lancia l’esecuzione della prova di concetto per lo specifico protocollo implementato.
+Ciascuna di queste classi espone il metodo Run\_PoC(), per lanciare l’esecuzione della prova di concetto dello specifico protocollo implementato.
 
-L’esecuzione delle PoC non prevede alcuna interazione con l’utente, che le esegue.
-Durante l’esecuzione vengono visualizzati una serie di messaggi, che permettono di seguire i passi di elaborazione dei vari blocchi che rappresentano le diverse fasi dello schema. 
-I parametri (locali/globali) necessari all'esecuzione, vengono impostati automaticamente nel codice durante i vari passaggi. 
+L’esecuzione delle PoC non prevede alcuna interazione con l’utente, che la esegue.  
+Durante l'elaborazione vengono visualizzati una serie di messaggi, che permettono di seguire i vari blocchi relativi alle diverse fasi dello schema.  
+I parametri (locali/globali) necessari all'esecuzione, vengono impostati direttamente nel codice.
 
-Questi parametri possono facilmente essere modificati nel sorgente, utilizzando le apposite proprietà delle classi per creare altri casi di test.
+Questi parametri possono facilmente essere modificati nel sorgente, mediante le apposite proprietà delle classi al fine di creare altri casi di test.
 
 ### PoC del protocollo TLP
+
 Implementazione del protocollo TLE con l'approccio dei Time Lock Puzzle.
 
 Il prototipo permette di creare un puzzle e risolverlo.  
@@ -50,9 +51,9 @@ PoC_TLP.Run_PoC()
 
 Implementa ll protocollo TLCS “muon” in versione interattiva
 
-Il caso di test implementato nella prova di concetto esegue la generazione di una coppia di chiavi (MPK_R, sk_R) 
-che sono in seguito utilizzate per la cifrare/decifrare un messaggio di prova. 
-Viene simulato anche l’invio di dati non corretti da parte di uno dei contributori. 
+Il caso di test implementato nella prova di concetto esegue la generazione di una coppia di chiavi (MPK\_R, sk\_R)  
+che sono in seguito utilizzate per la cifrare/decifrare un messaggio di prova.  
+Viene simulato anche l’invio di dati non corretti da parte di uno dei contributori.
 
 #### Classe statica  `PoC_TlcsMuon_i`
 
@@ -84,11 +85,12 @@ PoC_TlcsMuon_i.Run_PoC()
 
 ### PoC del protocollo ![](https://github.com/xfaber/TimeCryptor/blob/master/images/muon_ni.svg)
 
-Implementa ll protocollo TLCS “muon” in versione non interattiva.
-Il caso di test delal prove di concetto è il medesimo della versioen interattiva. 
-Esegue la generazione di una coppia di chiavi (MPK_R, sk_R) 
-che sono in seguito utilizzate per la cifrare/decifrare un messaggio di prova. 
+Implementa ll protocollo TLCS “muon” in versione non interattiva.  
+Il caso di test delal prove di concetto è il medesimo della versioen interattiva.  
+Esegue la generazione di una coppia di chiavi (MPK\_R, sk\_R)  
+che sono in seguito utilizzate per la cifrare/decifrare un messaggio di prova.  
 Viene simulato anche l’invio di dati non corretti da parte di uno dei contributori.
+
 #### Classe statica `PoC_TlcsMuon_ni`
 
 #### Elenco dei parametri da impostare per l'esecuzione della prova:
