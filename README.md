@@ -3,13 +3,12 @@
 Progetto che implementa una serie di prove di concetto (Proof Of Concept) di protocolli Time Lock Encryption.
 
 ### PoC del protocollo TLP
-
-#### Classe statica `PoC_TLP`
-
 Implementazione del protocollo TLE con l'approccio dei Time Lock Puzzle.
 
 Il prototipo permette di creare un puzzle e risolverlo.  
 Per la cifratura/decifratura è stato utilizzato lo schema di cifratura RC5 con una chiave a 160 bit.
+
+#### Classe statica `PoC_TLP`
 
 #### Parametri locali PoC
 
