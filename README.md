@@ -19,7 +19,7 @@ Per la cifratura/decifratura è stato utilizzato lo schema di cifratura RC5 con u
 
 ```plaintext
 var messaggio = "Ciao Ali";                                 // messaggio da cifrare
-var tempo = 10;                               				// tempo di blocco in secondi (tempo desiderato necessario alla decifratura)   
+var tempo = 10;                               				      // tempo di blocco in secondi (tempo desiderato necessario alla decifratura)   
 var bitLengthKey = 160;                                     // lunghezza in bit della chiave per la cifratura (256 bit per AES e 160 per RC5)
 var keyString = CryptoUtils.GetRandomKey(bitLengthKey / 8); // chiave di cifratura casuale    
 ```
@@ -32,7 +32,7 @@ PoC_TLP.Run_PoC()
 
 ## PoC del protocollo TLCS “muon” in versione interattiva
 
-Implementa ll protocollo TLCS Muon in versione non interattiva
+Implementa ll protocollo TLCS Muon (versione non interattiva)
 
 ### Classe statica :
 
@@ -68,7 +68,7 @@ PoC_TlcsMuon_ni.Run_PoC()
 
 ## PoC del protocollo TLCS “muon” in versione non interattiva
 
-Implementa ll protocollo TLCS Muon in versione non interattiva
+Implementa ll protocollo TLCS Muon (versione NON interattiva)
 
 ### Classe statica :
 
