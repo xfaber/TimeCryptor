@@ -54,17 +54,17 @@ Implementa ll protocollo TLCS “muon” in versione interattiva
 Il caso di test implementato nella prova di concetto esegue la cifratura a blocco temporale di un messaggio di prova con un blocco di 10 a partire dalla data/ora corrente (dell'esecuzione).  
 Viene simulata la pubblicazione di dati non corretti sulla blockchain da parte di uno dei contributori.
 
-I blocchi che implementano il test ed eseguono le varie fasi del protocollo sono i seguneti:
+I blocchi che implementano il test ed eseguono le varie fasi del protocollo sono i seguenti:
 
 1.  Configurazioni generali
 2.  Impostazione parametri PoC
 3.  Creazione istanze delle classi specifiche
 4.  Generazione dei parametri pubblici e pubblicazione sulla blockchain
 5.  Verifica delle prove 
-6.  Aggregazione (calcolo della chiave pubblica master MPK\_R)
+6.  Aggregazione (calcolo della chiave pubblica master MPK_R)
 7.  Cifratura 
 8.  Recupero della firma LOE
-9.  Procedura di inversione  (calcolo della chiave segreta sk\_r)
+9.  Procedura di inversione  (calcolo della chiave segreta sk_r)
 10.  Decifratura 
     
 
@@ -100,9 +100,11 @@ PoC_TlcsMuon_i.Run_PoC()
 
 Implementa ll protocollo TLCS “muon” in versione non interattiva.  
 Il caso di test della prova di concetto è il medesimo della versione interattiva.  
-Il test esegue la generazione di una coppia di chiavi (MPK\_R, sk\_R)  
-che in seguito vengono utilizzate per cifrare/decifrare un messaggio di prova.  
-Viene simulato l’invio di dati non corretti da parte di uno dei contributori.
+L'esecuzione segue lo stesso flusso di elaborazione con la differenza che alcuni blocchi effettuano la stessa operazione ma in modo differente, gli oggetti contributore e smart contract eseguono le operazioni in modo indipendente, senza interazione tra loro.
+
+   4.  Generazione dei parametri pubblici e pubblicazione sulla blockchain
+   5.  Verifica delle prove  
+   9.  Procedura di inversione  (calcolo della chiave segreta sk_r)
 
 #### Classe statica `PoC_TlcsMuon_ni`
 
