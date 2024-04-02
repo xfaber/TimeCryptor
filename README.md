@@ -62,11 +62,7 @@ PoC_TlcsMuon_i.Run_PoC()
 
 Implementa ll protocollo TLCS “muon” in versione non interattiva
 
-#### Classe statica :
-
-```plaintext
-PoC_TlcsMuon_ni
-```
+#### Classe statica `PoC_TlcsMuon_ni`
 
 #### Elenco dei parametri da impostare per l'esecuzione della prova:
 
