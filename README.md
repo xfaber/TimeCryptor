@@ -102,9 +102,9 @@ Implementa ll protocollo TLCS “muon” in versione non interattiva.
 Il caso di test della prova di concetto è il medesimo della versione interattiva.  
 L'esecuzione segue lo stesso flusso di elaborazione con la differenza che alcuni blocchi effettuano la stessa operazione ma in modo differente, gli oggetti contributore e smart contract eseguono le operazioni in modo indipendente, senza interazione tra loro.
 
-   4.  Generazione dei parametri pubblici e pubblicazione sulla blockchain
-   5.  Verifica delle prove  
-   9.  Procedura di inversione  (calcolo della chiave segreta sk_r)
+   - (4) Generazione dei parametri pubblici e pubblicazione sulla blockchain
+   - (5) Verifica delle prove  
+   - (9) Procedura di inversione  (calcolo della chiave segreta sk_r)
 
 #### Classe statica `PoC_TlcsMuon_ni`
 
