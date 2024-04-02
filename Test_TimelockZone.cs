@@ -1,9 +1,13 @@
 ﻿using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Parameters;
+using Org.BouncyCastle.Security;
+using Org.BouncyCastle.Utilities;
 using Org.BouncyCastle.Utilities.Encoders;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using TimeCryptor.Classes;
@@ -12,12 +16,80 @@ using static TimeCryptor.Utils.BJJUtils;
 
 namespace TimeCryptor
 {
-    public static class Test_TimelockZone
+  public static class Test_TimelockZone
   {
     public enum CurveEnum
     {
       secp256k1,
       babyjubjub
+    }
+
+;
+    public static (Org.BouncyCastle.Math.EC.ECPoint PK, Org.BouncyCastle.Math.BigInteger sk) GetRndKeyPair(ECDomainParameters ecParams)
+    {
+      var skField = ecParams.Curve.RandomFieldElement(new SecureRandom()); //sceglie una sk casuale dal gruppo della curva ellittica scelta
+      var sk = skField.ToBigInteger();
+      var PK = ecParams.G.Multiply(sk);                                   //calcola la chiave PK corrispondente
+      if (!PK.IsValid()) throw new Exception("PK not valid!");
+      return (PK, sk);
+    }
+    
+    public class SchnorrSignature
+    {
+      public Org.BouncyCastle.Math.BigInteger s { get; set; }
+      public Org.BouncyCastle.Math.BigInteger e { get; set; }
+    }
+    public static SchnorrSignature GetSchnorrSignature(string M, Org.BouncyCastle.Math.BigInteger sk, ECDomainParameters ecParams)
+    {
+      //Reference: https://it.wikipedia.org/wiki/Firma_di_Schnorr
+      var bCompressed = false;      
+      var rk = GetRndKeyPair(ecParams); //(r,k)
+
+      var pklength = rk.PK.GetEncodedLength(bCompressed);
+      byte[] rBytes = new byte[pklength];
+      rk.PK.EncodeTo(bCompressed, rBytes, 0);
+
+      //e=H(r||M)
+      var Mbytes = System.Text.Encoding.UTF8.GetBytes(M);
+      byte[] rMbytes = rBytes.Concat(Mbytes).ToArray();
+      var e = CryptoUtils.GetSHA256(rMbytes);
+      var eNum = new Org.BouncyCastle.Math.BigInteger(e);
+      //s = k-xe
+      var s = rk.sk.Subtract(sk.Multiply(eNum).Mod(ecParams.N)).Mod(ecParams.N);
+      var sign = new SchnorrSignature() { s = s, e = eNum };
+
+      return sign;
+    }
+    public static bool VerifySchnorrSignature(string M, SchnorrSignature sign, Org.BouncyCastle.Math.EC.ECPoint PK, ECDomainParameters ecParams)
+    {
+      //Reference: https://it.wikipedia.org/wiki/Firma_di_Schnorr
+      var bCompressed = false;
+      var Mbytes = System.Text.Encoding.UTF8.GetBytes(M);
+      var gs = ecParams.G.Multiply(sign.s);
+      var ye = PK.Multiply(sign.e);
+      var rv = gs.Add(ye);
+
+      // ev=H(rv||M)
+      var rvLength = rv.GetEncodedLength(bCompressed);
+      var rvBytes = new byte[rvLength];
+      rv.EncodeTo(bCompressed, rvBytes, 0);
+      byte[] rvMbytes = rvBytes.Concat(Mbytes).ToArray();
+      var ev = CryptoUtils.GetSHA256(rvMbytes);
+
+      var checkSign = sign.e.ToByteArray().SequenceEqual(ev);
+      return checkSign;
+    }
+    public static void Run_Test_SchnorrSignature() 
+    { 
+      var M = "Ciao Schnorr";
+      Console.WriteLine($"Messaggio: {M}");
+      var ecParams = CryptoUtils.GetEcDomainParametersByCustomData(CryptoUtils.ECname.secp256k1.ToString());
+      var xy = GetRndKeyPair(ecParams); //(x,y)
+
+      var sign = GetSchnorrSignature(M, xy.sk, ecParams);
+      Console.WriteLine($"Firma: (s,e)=({sign.s.ToString()},{sign.e.ToString()})");
+      var check = VerifySchnorrSignature(M, sign, xy.PK, ecParams);
+      Console.WriteLine($"Firma valida? {(check ? "SI" : "NO")}");
     }
 
     public static void Run_Test_ValidationKeys()
@@ -61,7 +133,7 @@ namespace TimeCryptor
       Console.WriteLine($"=== {Test_TimelockZone_ECIES(timeLockZone.GetKeyPair(4893691))} ===\n\n");
       //Console.WriteLine($"=== {Test_TimelockZone_ECIES(listKeyPair.Single(s => s.Round == 4894031))} ===\n\n"); 
     }
-    
+
     /// <summary>
     /// Controlla che la coppia di chiavi restituite dal servizio TimeLock.zone sia corretta la sk sia invertibile (ossi ala chiave derivata dalal privata sia corretta)
     /// </summary>
@@ -152,7 +224,7 @@ namespace TimeCryptor
 
       }
       catch (Exception ex)
-      { 
+      {
         Console.WriteLine($"Errore: {ex.Message}");
 
       }

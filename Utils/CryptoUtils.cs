@@ -230,7 +230,7 @@ namespace TimeCryptor
       Org.BouncyCastle.Math.BigInteger generatorY;
 
       // Generating EC parameters   
-      switch (curveName)
+      switch (curveName.ToLower())
       {
         case "babyjubjub":
           // Generator point TE BabyJubJub
