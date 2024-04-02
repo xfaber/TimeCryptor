@@ -106,8 +106,8 @@ PoC_TlcsMuon_ni.Run_PoC()
 
 Enumerativo `ReqDataModeEnum`
 
-*   `FromWeb`: permette di recuperare la chiave dal servizio HTTP API drand per la rete specificata da `_drandNetworkHash_`, con il metodo `_GetPkFromWeb_()`.
-*   `FromLocal`: permette di recuperare chiave e firme LOE, creandole in locale in modo casuale, attraverso una apposita procedura implementata nel metodo `Set_LOE_Data_FromLocal_()`.
+*   `FromWeb`: permette di recuperare la chiave dal servizio HTTP API drand per la rete specificata da `drandNetworkHash`, con il metodo `GetPkFromWeb()`.
+*   `FromLocal`: permette di recuperare chiave e firme LOE, creandole in locale in modo casuale, attraverso una apposita procedura implementata nel metodo `Set_LOE_Data_FromLocal()`.
 
 ## Simulazione contributore non valido
 
