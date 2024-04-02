@@ -2,7 +2,7 @@
 
 Progetto che implementa una serie di prove di concetto (Proof Of Concept) di protocolli Time Lock Encryption.
 
-## PoC del protocollo TLCS 
+## PoC del protocollo TLP 
 
 ### Classe statica :
 
