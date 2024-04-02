@@ -30,7 +30,7 @@ namespace TimeCryptor
       #endregion
 
       #region IMPOSTAZIONE DEI PARAMETRI PER LA CREAZIONE DEL PUZZLE
-      var messaggio = "Ciao Ali";                                 // messaggio da cifrare
+      var messaggio = "Ciao TLP";                                 // messaggio da cifrare
       //var futureDate = new DateTime(2023, 12, 10, 00, 00, 00);  
       //var tempo = int.Parse(Math.Truncate((futureDate - DateTime.Now).TotalSeconds).ToString());
       var tempo = 10; // 1*24*60*60;                              // tempo in secondi (tempo desiderato necessario alla decifratura)   
