@@ -3,7 +3,7 @@
 Progetto che implementa una serie di prove di concetto (Proof Of Concept) di protocolli Time Lock Encryption.
 
 Le prove di concetto sono finalizzate alla verifica della corretta funzionalità dei protocolli  
-e permettono di avere un approccio pratico su come affrontare le diverse problematiche che si possono incontrare durante l'implementazione di questi protocolli.
+e permettono di avere un approccio pratico su come affrontare le diverse problematiche che si possono incontrare durante l'implementazione.
 
 \=======================================================
 
@@ -100,9 +100,10 @@ PoC_TlcsMuon_i.Run_PoC()
 
 Implementa ll protocollo TLCS “muon” in versione non interattiva.  
 Il caso di test della prova di concetto è il medesimo della versione interattiva.  
-L'esecuzione segue lo stesso flusso di elaborazione con la differenza che alcuni blocchi effettuano la stessa operazione ma in modo differente, gli oggetti contributore e smart contract eseguono le operazioni in modo indipendente, senza interazione tra loro.
+L'esecuzione segue lo stesso flusso di elaborazione con la differenza che alcuni blocchi (più sotto riportati) pur avendo la stessa finalità 
+eseguono le operazioni in modo differente, nello specifico gli oggetti di tipo `Contributor` e `SmartContract` eseguono le operazioni in modo indipendente, senza interazione tra loro.
 
-   - (4) Generazione dei parametri pubblici e pubblicazione sulla blockchain
+   - (4) Generazione dei parametri pubblici
    - (5) Verifica delle prove  
    - (9) Procedura di inversione  (calcolo della chiave segreta sk_r)
 
