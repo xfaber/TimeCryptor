@@ -2,20 +2,16 @@
 
 Progetto che implementa una serie di prove di concetto (Proof Of Concept) di protocolli Time Lock Encryption.
 
-## PoC del protocollo TLP 
+### PoC del protocollo TLP
 
-### Classe statica :
-
-```plaintext
-PoC_TlcsMuon_i
-```
+#### Classe statica `PoC_TLP`
 
 Implementazione del protocollo TLE con l'approccio dei Time Lock Puzzle.
 
 Il prototipo permette di creare un puzzle e risolverlo.  
 Per la cifratura/decifratura è stato utilizzato lo schema di cifratura RC5 con una chiave a 160 bit.
 
-### Parametri locali PoC
+#### Parametri locali PoC
 
 ```plaintext
 var messaggio = "Ciao TLP";                                  // messaggio da cifrare
@@ -30,19 +26,15 @@ Per lanciare l'esecuzione della PoC chiamare il metodo `Run_PoC()`
 PoC_TLP.Run_PoC()
 ```
 
-## PoC del protocollo ![](https://github.com/xfaber/TimeCryptor/blob/master/images/muon_i.svg) 
+### PoC del protocollo ![](https://github.com/xfaber/TimeCryptor/blob/master/images/muon_i.svg)
 
 Implementa ll protocollo TLCS “muon” in versione interattiva
 
-### Classe statica :
+#### Classe statica  `PoC_TlcsMuon_i`
 
-```plaintext
-PoC_TlcsMuon_i
-```
+#### Elenco dei parametri da impostare per l'esecuzione della prova:
 
-### Elenco dei parametri da impostare per l'esecuzione della prova:
-
-#### Parametri locali PoC
+##### Parametri locali PoC
 
 ```plaintext
   var MUON_VerifyMode = VerifyModeEnum.Interactive;
@@ -51,7 +43,7 @@ PoC_TlcsMuon_i
   var futureDateTime = DateTime.Now.AddSeconds(10);
 ```
 
-#### Parametri globali PoC
+##### Parametri globali PoC
 
 ```plaintext
   _globalParams = new GlobalParams(CryptoUtils.ECname.secp256k1);
@@ -66,19 +58,19 @@ Per lanciare l'esecuzione della PoC chiamare il metodo `Run_PoC()`
 PoC_TlcsMuon_ni.Run_PoC()
 ```
 
-## PoC del protocollo ![](https://github.com/xfaber/TimeCryptor/blob/master/images/muon_ni.svg)
+### PoC del protocollo ![](https://github.com/xfaber/TimeCryptor/blob/master/images/muon_ni.svg)
 
 Implementa ll protocollo TLCS “muon” in versione non interattiva
 
-### Classe statica :
+#### Classe statica :
 
 ```plaintext
 PoC_TlcsMuon_ni
 ```
 
-### Elenco dei parametri da impostare per l'esecuzione della prova:
+#### Elenco dei parametri da impostare per l'esecuzione della prova:
 
-#### Parametri locali PoC
+##### Parametri locali PoC
 
 ```plaintext
   var MUON_VerifyMode = VerifyModeEnum.NotInteractive;
@@ -87,7 +79,7 @@ PoC_TlcsMuon_ni
   var futureDateTime = DateTime.Now.AddSeconds(10);
 ```
 
-#### Parametri globali PoC
+##### Parametri globali PoC
 
 ```plaintext
   _globalParams = new GlobalParams(CryptoUtils.ECname.secp256k1);
@@ -102,13 +94,13 @@ Per lanciare l'esecuzione della PoC chiamare il metodo `Run_PoC()`
 PoC_TlcsMuon_ni.Run_PoC()
 ```
 
-## Modalità di richiesta dei dati LOE
+### Modalità di richiesta dei dati LOE
 
 Enumerativo `ReqDataModeEnum`
 
 *   `FromWeb`: permette di recuperare la chiave dal servizio HTTP API drand per la rete specificata da `drandNetworkHash`, con il metodo `GetPkFromWeb()`.
 *   `FromLocal`: permette di recuperare chiave e firme LOE, creandole in locale in modo casuale, attraverso una apposita procedura implementata nel metodo `Set_LOE_Data_FromLocal()`.
 
-## Simulazione contributore non valido
+### Simulazione contributore non valido
 
 Impostando il parametro `bHonestParty=false` nella chiamata al metodo `PublishToBlockchain` della classe `Contributors` viene simulato il comportamento di un contributore malevolo, che invia dati errati sulla blockchain. In questo modo viene pubblicata dallo specifico contributore una chiave casuale non coerente.
