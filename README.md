@@ -1,6 +1,6 @@
 ## TimeCryptor
 
-Progetto che implementa una serie di Proof of Concept di protocolli per Time Lock Encryption.
+Progetto che implementa una serie di prove di concetto (Proof Of Concept) di protocolli Time Lock Encryption.
 
 ## PoC del protocollo TLCS 
 
