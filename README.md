@@ -30,7 +30,7 @@ Per lanciare l'esecuzione della PoC chiamare il metodo `Run_PoC()`
 PoC_TLP.Run_PoC()
 ```
 
-## PoC del protocollo   ![](https://33333.cdn.cke-cs.com/kSW7V9NHUXugvhoQeFaf/images/5dd945c8f2b477812004aa55ca643591d36939eb5cd60c5f.png) 
+## PoC del protocollo   ![](https://github.com/xfaber/TimeCryptor/blob/master/images/muon_ni.svg) 
 
 Implementa ll protocollo TLCS “muon” in versione non interattiva
 
@@ -66,7 +66,7 @@ Per lanciare l'esecuzione della PoC chiamare il metodo `Run_PoC()`
 PoC_TlcsMuon_ni.Run_PoC()
 ```
 
-## PoC del protocollo ![](https://33333.cdn.cke-cs.com/kSW7V9NHUXugvhoQeFaf/images/c95a7c03f05b094ed4eeb50df08164b51ef964363413040d.png)
+## PoC del protocollo ![](https://github.com/xfaber/TimeCryptor/blob/master/images/muon_i.svg)
 
 Implementa ll protocollo TLCS “muon” in versione non interattiva
 
