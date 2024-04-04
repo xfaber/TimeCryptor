@@ -56,8 +56,8 @@ Viene simulata la pubblicazione di dati non corretti sulla blockchain da parte d
 
 I blocchi che implementano il test ed eseguono le varie fasi del protocollo sono i seguenti:
 
-1.  Configurazioni generali
-2.  Impostazione parametri PoC
+1.  Configurazioni generali (parametri locali)
+2.  Impostazione parametri PoC (parametri globali)
 3.  Creazione istanze delle classi specifiche
 4.  Generazione dei parametri pubblici e pubblicazione sulla blockchain
 5.  Verifica delle prove 
