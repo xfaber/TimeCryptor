@@ -17,15 +17,15 @@ Ogni prototipo è stato racchiuso in una classe statica denominata con il prefis
 
 Ciascuna di queste classi espone il metodo Run\_PoC(), per lanciare l’esecuzione della prova di concetto dello specifico protocollo implementato.
 
-L’esecuzione delle PoC non prevede alcuna interazione con l’utente, che la esegue.  
+L’esecuzione delle PoC non prevede alcuna interazione con l’utente, che la esegue, ma effettuano l'elaborazione di un caso di test specifico.  
 Durante l'elaborazione vengono visualizzati una serie di messaggi, che permettono di seguire i vari blocchi relativi alle diverse fasi dello schema.  
-I parametri (locali/globali) necessari all'esecuzione, vengono impostati direttamente nel codice.
 
+I parametri (locali/globali) necessari all'esecuzione, vengono impostati direttamente nel codice.
 Questi parametri possono facilmente essere modificati nel sorgente, mediante le apposite proprietà delle classi al fine di creare altri casi di test.
 
 ### PoC del protocollo TLP
 
-Implementazione del protocollo TLE con l'approccio dei Time Lock Puzzle.
+Prova di concettto che implementa il protocollo TLE con l'approccio dei Time Lock Puzzle.
 
 Il prototipo permette di creare un puzzle e risolverlo.  
 Per la cifratura/decifratura è stato utilizzato lo schema di cifratura RC5 con una chiave a 160 bit.
@@ -49,9 +49,9 @@ PoC_TLP.Run_PoC()
 
 ### PoC del protocollo ![](https://github.com/xfaber/TimeCryptor/blob/master/images/muon_i.svg)
 
-Implementa ll protocollo TLCS “muon” in versione interattiva
+Prova di concettto che implementa il protocollo TLCS “muon” in versione interattiva.
 
-Il caso di test implementato nella prova di concetto esegue la cifratura a blocco temporale di un messaggio di prova con un blocco di 10 a partire dalla data/ora corrente (dell'esecuzione).  
+Il caso di test implementato nella prova esegue la cifratura a blocco temporale di un messaggio di prova con un blocco temporale di 10 secondi a partire dalla data/ora corrente (dell'esecuzione).  
 Viene simulata la pubblicazione di dati non corretti sulla blockchain da parte di uno dei contributori.
 
 I blocchi che implementano il test ed eseguono le varie fasi del protocollo sono i seguenti:
@@ -98,9 +98,10 @@ PoC_TlcsMuon_i.Run_PoC()
 
 ### PoC del protocollo ![](https://github.com/xfaber/TimeCryptor/blob/master/images/muon_ni.svg)
 
-Implementa ll protocollo TLCS “muon” in versione non interattiva.  
+Prova di concettto che implementa il protocollo TLCS “muon” in versione non interattiva.
+
 Il caso di test della prova di concetto è il medesimo della versione interattiva.  
-L'esecuzione segue lo stesso flusso di elaborazione con la differenza che alcuni blocchi (più sotto riportati) pur avendo la stessa finalità 
+L'esecuzione segue lo stesso flusso di elaborazione con la differenza che alcuni blocchi (più sotto riportati), pur avendo la stessa finalità, 
 eseguono le operazioni in modo differente, nello specifico gli oggetti di tipo `Contributor` e `SmartContract` eseguono le operazioni in modo indipendente, senza interazione tra loro.
 
    - (4) Generazione dei parametri pubblici
