@@ -24,7 +24,7 @@ namespace TimeCryptor
       // numero di quadrature al secondo del risolutore (che decifra il messagio)
       var numQuadrature = new Org.BouncyCastle.Math.BigInteger("300000");
       var quadratureParams = GetSquarePerSecond(numQuadrature, bitLengthPrimeNum);
-      //var quadratureParams = GetSquarePerSecond2(numQuadrature, bitLengthPrimeNum);
+      //var quadratureParams = GetSquarePerSecond2(bitLengthPrimeNum);
       //  45454 con 2048 bit                           
       // 200000 con 1024 bit
       #endregion
@@ -251,8 +251,7 @@ namespace TimeCryptor
       Org.BouncyCastle.Math.BigInteger q,
       Org.BouncyCastle.Math.BigInteger a,
       Org.BouncyCastle.Math.BigInteger quadratureAlSec)
-      GetSquarePerSecond2(Org.BouncyCastle.Math.BigInteger numeroQuadrature, 
-                          int bitLengthPrimeNum)
+      GetSquarePerSecond2(int bitLengthPrimeNum)
     {
       //Dati recuperati dal calcolo del numero di quadrature in base al tasso di crescita di Moore nella procedura di Rivest per il calcolo delle quadrature di TLP35 (1999)
       var secondsPerYear = new Org.BouncyCastle.Math.BigInteger("31536000", 10);
