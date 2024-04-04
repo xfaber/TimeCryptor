@@ -28,7 +28,7 @@ namespace TimeCryptor
       G1setDst("BLS_SIG_BLS12381G1_XMD:SHA-256_SSWU_RO_NUL_"); //DST da impostare in base alla chain drand da utilizzare 
       //G1setDst("BLS_SIG_BLS12381G2_XMD:SHA-256_SSWU_RO_NUL_"); //su alcune chain (quelle non conformi a RFC rfc9380) viene usato erroneamente un DST sbagliato, refuso post switch G1<->G2
       var MUON_VerifyMode = VerifyModeEnum.NotInteractive;
-      var LOE_ReqDataMode = LeagueOfEntropy.ReqDataModeEnum.FromLocal;
+      var LOE_ReqDataMode = LeagueOfEntropy.ReqDataModeEnum.FromWeb;
       
       var message = "Hello TLE!";
       var futureDateTime = DateTime.Now.AddSeconds(10);
