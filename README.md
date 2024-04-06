@@ -35,7 +35,7 @@ Per la cifratura/decifratura è stato utilizzato lo schema di cifratura RC5 con 
 #### Parametri locali PoC
 
 ```plaintext
-var messagge = "Ciao TLP";                                  // messaggio da cifrare
+var message = "Ciao TLP";                                  // messaggio da cifrare
 var timelock = 10;                                              // tempo di blocco in secondi (tempo desiderato necessario alla decifratura)   
 var bitLengthKey = 160;                                      // lunghezza in bit chiave di cifratura (256 bit per AES e 160 per RC5)
 var keyString = CryptoUtils.GetRandomKey(bitLengthKey / 8);  // chiave di cifratura casuale    
