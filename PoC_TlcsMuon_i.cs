@@ -97,7 +97,7 @@ namespace TimeCryptor
       Console.WriteLine($"Blocco temporale fino a : {futureDateTime.ToString("dd/MM/yyyy HH:mm:ss")}");
       #endregion
 
-      #region RECUPERO DELLA FIRMA LOE
+      #region RECUPERO DELLA FIRMA BLS DI LOE
       Console.WriteLine("\n=== RECUPERO LA FIRMA LOE ===");
       G1? sigmaLOE = null;
       while (sigmaLOE == null)

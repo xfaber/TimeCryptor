@@ -22,27 +22,27 @@ namespace TimeCryptor
       // 11/11/2023 --> Impostando una lunghezza in bit dei numeri primi scelti a 4096 il tempo di creazione del puzzle supera il tempo di risoluzione
       var bitLengthPrimeNum = 1024; // lunghezza in bit dei numeri primi scelti    
       // numero di quadrature al secondo del risolutore (che decifra il messagio)
-      var numQuadrature = new Org.BouncyCastle.Math.BigInteger("300000");
-      var quadratureParams = GetSquarePerSecond(numQuadrature, bitLengthPrimeNum);
-      //var quadratureParams = GetSquarePerSecond2(bitLengthPrimeNum);
+      var numOfSquarings = new Org.BouncyCastle.Math.BigInteger("300000");
+      //var squaringsParams = GetSquaringsPerSecond(numOfSquarings, bitLengthPrimeNum);
+      var squaringsParams = GetSquaringsPerSecond_TLP35Mode(bitLengthPrimeNum,2019);
       //  45454 con 2048 bit                           
       // 200000 con 1024 bit
       #endregion
 
       #region IMPOSTAZIONE DEI PARAMETRI PER LA CREAZIONE DEL PUZZLE
-      var messaggio = "Ciao TLP";                                 // messaggio da cifrare
+      var message = "Ciao TLP";                                 // messaggio da cifrare
       //var futureDate = new DateTime(2023, 12, 10, 00, 00, 00);  
       //var tempo = int.Parse(Math.Truncate((futureDate - DateTime.Now).TotalSeconds).ToString());
-      var tempo = 10; // 1*24*60*60;                              // tempo in secondi (tempo desiderato necessario alla decifratura)   
+      var tempo = 10;                                             // tempo in secondi (tempo desiderato necessario alla decifratura)   
       var bitLengthKey = 160;                                     // lunghezza in bit della chiave per la cifratura (256 bit per AES e 160 per RC5)
       var keyString = CryptoUtils.GetRandomKey(bitLengthKey / 8); // genera una chiave casuale    
 
-      Logger.Log($"Messaggio: {messaggio}");
+      Logger.Log($"Messaggio: {message}");
       Logger.Log($"Chiave: {keyString}");
       Logger.Log($"Lunghezza chiave (bit): {bitLengthKey}");
       Logger.Log($"Lunghezza numeri primi (bit): {bitLengthPrimeNum}");
       Logger.Log($"Tempo previsto per la risoluzione (secondi): {tempo}");
-      Logger.Log($"Potenza di calcolo del risolutore (quadrature/secondo): {quadratureParams.quadratureAlSec}\n");
+      Logger.Log($"Potenza di calcolo del risolutore (quadrature/secondo): {squaringsParams.squaringsPerSec}\n");
       #endregion
 
       #region CREAZIONE DEL PUZZLE
@@ -50,7 +50,7 @@ namespace TimeCryptor
       Logger.Log($"Creazione time lock puzzle -INIZIO-");
       Stopwatch sw = new Stopwatch();
       sw.Start();
-      var puzzleParameters = CreateTLP(messaggio, keyString, tempo, quadratureParams.p, quadratureParams.q, quadratureParams.a, quadratureParams.quadratureAlSec);
+      var puzzleParameters = CreateTLP(message, keyString, tempo, squaringsParams.p, squaringsParams.q, squaringsParams.a, squaringsParams.squaringsPerSec);
       sw.Stop();
       //Logger.Log($"Tempo per la creazione del puzzle: {sw.ElapsedMilliseconds} ms");
       Logger.Log($"n: -- prodotto dei due numeri primi p e q --"); puzzleParameters.n.Print();
@@ -74,7 +74,7 @@ namespace TimeCryptor
         var ret = ResolveTLP(puzzleParameters);
         sw.Stop();
         Logger.Log($"decryptedKey = keyString ? {((ret.decryptedKey == keyString) ? "OK" : ".......ERRORE!")}");
-        Logger.Log($"decryptedMessage = messaggio ? {((ret.decryptedMessage == messaggio) ? "OK" : ".......ERRORE!")}");
+        Logger.Log($"decryptedMessage = messaggio ? {((ret.decryptedMessage == message) ? "OK" : ".......ERRORE!")}");
         Logger.Log($"Risoluzione time lock puzzle -FINE-");
         Console.WriteLine($"---------------------------------------------------------------------------");
         Logger.Log($"Tempo per la risoluzione del puzzle: {sw.ElapsedMilliseconds} ms ({sw.ElapsedMilliseconds / 1000} s)");
@@ -85,9 +85,9 @@ namespace TimeCryptor
     /// <summary>
     /// Restituisce la tupla (n,a,t,CK,CM) contenente i dati del puzzle da risolvere
     /// </summary>
-    /// <param name="messaggio">il messaggio da cifrare (si usa la cifratura RC5 con un solo blocco di 8 byte = 64 bit)</param>
+    /// <param name="message">il messaggio da cifrare (si usa la cifratura RC5 con un solo blocco di 8 byte = 64 bit)</param>
     /// <param name="keyString">chiave di cifratura</param>
-    /// <param name="tempo">Tempo di blocco del puzzle</param>
+    /// <param name="timelock">Tempo di blocco del puzzle</param>
     /// <param name="p">
     /// numero primo casuale 
     /// </param>
@@ -97,7 +97,7 @@ namespace TimeCryptor
     /// <param name="a">
     /// numero casuale tale che (1 < a < n)
     /// </param>
-    /// <param name="quadratureAlSec">
+    /// <param name="squaringsPerSecond">
     /// Numero di quadrature al secondo (potenza di computazione stimata dell'ipotetica macchina risolutrice)
     /// </param>
     /// <returns></returns>
@@ -106,20 +106,20 @@ namespace TimeCryptor
                    Org.BouncyCastle.Math.BigInteger t,
                    Org.BouncyCastle.Math.BigInteger CK,
                    string CM)
-      CreateTLP(string messaggio,
+      CreateTLP(string message,
                 string keyString,
-                int tempo,
+                int timelock,
                 Org.BouncyCastle.Math.BigInteger p,
                 Org.BouncyCastle.Math.BigInteger q,
                 Org.BouncyCastle.Math.BigInteger a,
-                Org.BouncyCastle.Math.BigInteger quadratureAlSec)
+                Org.BouncyCastle.Math.BigInteger squaringsPerSecond)
     {
       // Supponiamo che Alice abbia un messaggio M
       // che vuole crittografare con un puzzle time-lock 
       // per un periodo di tempo di T secondi.
-      var M = messaggio;                                  // Il messaggio da cifrare
-      var T = CryptoUtils.ConvertToBigIntergerBC(tempo);  // Il tempo in secondi  (che deve essere impiegato per la decifratura)
-      var S = quadratureAlSec;  // S è il numero di quadrature modulo n al secondo che possono essere elaborate dal risolutore
+      var M = message;                                  // Il messaggio da cifrare
+      var T = CryptoUtils.ConvertToBigIntergerBC(timelock);  // Il tempo in secondi  (che deve essere impiegato per la decifratura)
+      var S = squaringsPerSecond;  // S è il numero di quadrature modulo n al secondo che possono essere elaborate dal risolutore
 
       // Genera il modulo composito n come prodotto di due grandi numeri primi segreti p e q scelti casualmente
       var n = p.Multiply(q);
@@ -206,14 +206,14 @@ namespace TimeCryptor
     /// <summary>
     /// Stima il numere di quadratura di una ipotetica macchina risolutrice
     /// </summary>
-    /// <param name="numeroQuadrature"></param>
+    /// <param name="numOfSquarings"></param>
     /// <param name="bitLengthPrimeNum"></param>
     /// <returns></returns>
     public static (Org.BouncyCastle.Math.BigInteger p,
                    Org.BouncyCastle.Math.BigInteger q,
                    Org.BouncyCastle.Math.BigInteger a,
-                   Org.BouncyCastle.Math.BigInteger quadratureAlSec)
-      GetSquarePerSecond (Org.BouncyCastle.Math.BigInteger numeroQuadrature, 
+                   Org.BouncyCastle.Math.BigInteger squaringsPerSec)
+      GetSquaringsPerSecond (Org.BouncyCastle.Math.BigInteger numOfSquarings, 
                           int bitLengthPrimeNum)
     {
       var p = CryptoUtils.GetRandomPrimeNumber(bitLengthPrimeNum);
@@ -227,41 +227,54 @@ namespace TimeCryptor
       //Logger.Log($"a: ",false);a.Print();
       Console.WriteLine("");
       Console.WriteLine($"---------------------------------------------------------------------------");
-      Logger.Log($"Calcolo {numeroQuadrature} quadrature di a modulo n");
+      Logger.Log($"Calcolo {numOfSquarings} quadrature di a modulo n");
 
       // Calcola a^2^t mod n
       var mille = new Org.BouncyCastle.Math.BigInteger("1000");
       var sw = new Stopwatch();
       sw.Start();
-      var b = a.ModPow(Org.BouncyCastle.Math.BigInteger.Two.Pow(numeroQuadrature.IntValue), n);
+      var b = a.ModPow(Org.BouncyCastle.Math.BigInteger.Two.Pow(numOfSquarings.IntValue), n);
       sw.Stop();
-      Logger.Log($"Tempo di elaborazione per {numeroQuadrature} quadrature: {sw.Elapsed.TotalMilliseconds} ms");
+      Logger.Log($"Tempo di elaborazione per {numOfSquarings} quadrature: {sw.Elapsed.TotalMilliseconds} ms");
       var ms = new Org.BouncyCastle.Math.BigInteger(Math.Ceiling(sw.Elapsed.TotalMilliseconds).ToString());
-      var quadraturePerSecond = numeroQuadrature.Divide(ms).Multiply(mille);
+      var squaringsPerSecond = numOfSquarings.Divide(ms).Multiply(mille);
       Console.WriteLine($"---------------------------------------------------------------------------");
-      Logger.Log($"Numero quadrature per secondo per questa macchina: {quadraturePerSecond}");
+      Logger.Log($"Numero quadrature per secondo per questa macchina: {squaringsPerSecond}");
 
       //Logger.Log($"b: "); b.Print();
 
-      return (p, q, a, quadraturePerSecond);
+      return (p, q, a, squaringsPerSecond);
     }
 
 
     public static (Org.BouncyCastle.Math.BigInteger p,
       Org.BouncyCastle.Math.BigInteger q,
       Org.BouncyCastle.Math.BigInteger a,
-      Org.BouncyCastle.Math.BigInteger quadratureAlSec)
-      GetSquarePerSecond2(int bitLengthPrimeNum)
+      Org.BouncyCastle.Math.BigInteger squaringsPerSec)
+      GetSquaringsPerSecond_TLP35Mode(int bitLengthPrimeNum, int yearVersion=1999)
     {
-      //Dati recuperati dal calcolo del numero di quadrature in base al tasso di crescita di Moore nella procedura di Rivest per il calcolo delle quadrature di TLP35 (1999)
+      
       var secondsPerYear = new Org.BouncyCastle.Math.BigInteger("31536000", 10);
-      var squaringsInYear2024 = new Org.BouncyCastle.Math.BigInteger("3407624672177", 10);
-      var quadraturePerSecond = squaringsInYear2024.Divide(secondsPerYear);
-
-      //Dati recuperati dal calcolo del numero di quadrature in base al tasso di cresscita nella procedura di Rivest per il calcolo delle quadrature di TLP35 (2019)
-      //var secondsPerYear = new Org.BouncyCastle.Math.BigInteger("31536000", 10);
-      //var squaringsInYear2024 = new Org.BouncyCastle.Math.BigInteger("1127554845855", 10);
-      //var quadraturePerSecond = squaringsInYear2024.Divide(secondsPerYear);
+      Org.BouncyCastle.Math.BigInteger squaringsInYear2024;
+      Org.BouncyCastle.Math.BigInteger squaringsPerSecond;
+      switch (yearVersion)
+      {
+        case 1999:
+          //Reference: https://people.csail.mit.edu/rivest/pubs/Riv99b.lcs35-puzzle-description.txt 
+          //Dati recuperati dal calcolo del numero di quadrature in base al tasso di crescita di Moore nella procedura di Rivest per il calcolo delle quadrature di TLP35 (1999)
+          squaringsInYear2024 = new Org.BouncyCastle.Math.BigInteger("3407624672177", 10);
+          squaringsPerSecond = squaringsInYear2024.Divide(secondsPerYear);
+          break;
+        case 2019:
+          //Reference: https://people.csail.mit.edu/rivest/pubs/Riv19f.new-puzzle.pdf
+          //Dati recuperati dal calcolo del numero di quadrature in base al tasso di crescita nella procedura di Rivest per il calcolo delle quadrature di TLP35 (2019)          
+          squaringsInYear2024 = new Org.BouncyCastle.Math.BigInteger("1127554845855", 10); 
+          squaringsPerSecond = squaringsInYear2024.Divide(secondsPerYear);
+          break;
+        default:
+        throw new Exception("Year version not implemented!");
+          break;
+      }
 
       var p = CryptoUtils.GetRandomPrimeNumber(bitLengthPrimeNum);
       var q = CryptoUtils.GetRandomPrimeNumber(bitLengthPrimeNum);
@@ -274,11 +287,11 @@ namespace TimeCryptor
       //Logger.Log($"a: ",false);a.Print();
 
       Console.WriteLine($"---------------------------------------------------------------------------");
-      Logger.Log($"Numero quadrature per secondo per questa macchina: {quadraturePerSecond}");
+      Logger.Log($"Numero quadrature per secondo per questa macchina: {squaringsPerSecond}");
 
       //Logger.Log($"b: "); b.Print();
 
-      return (p, q, a, quadraturePerSecond);
+      return (p, q, a, squaringsPerSecond);
     }
 
   }

@@ -24,7 +24,6 @@ namespace TimeCryptor
       babyjubjub
     }
 
-;
     public static (Org.BouncyCastle.Math.EC.ECPoint PK, Org.BouncyCastle.Math.BigInteger sk) GetRndKeyPair(ECDomainParameters ecParams)
     {
       var skField = ecParams.Curve.RandomFieldElement(new SecureRandom()); //sceglie una sk casuale dal gruppo della curva ellittica scelta

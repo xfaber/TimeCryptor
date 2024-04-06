@@ -38,7 +38,7 @@
       </Enum>
     </NestedTypes>
     <TypeIdentifier>
-      <HashCode>AAIAAAAIEkAAAAAAAAAAEAAAAAAAAIAQAAAAADBAAAI=</HashCode>
+      <HashCode>AAIAAAAIAkAAAAAAAAAAEAAAAAAAAIASAAAAADBAAAI=</HashCode>
       <FileName>Classes\LeagueOfEntropy.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -89,6 +89,27 @@
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAA=</HashCode>
       <FileName>Classes\PK_T_y_ItemExtended.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TimeCryptor.PoC_TLP">
+    <Position X="16.75" Y="8.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAEAAAAAAAAACAAAAAAACAAAEAAABAAAAA=</HashCode>
+      <FileName>PoC_TLP.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TimeCryptor.PoC_TlcsMuon_i">
+    <Position X="19.25" Y="8.5" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAgAAAAAQAAAAAAAAAAAAAAEAAAAigAAAAAAAAAAAA=</HashCode>
+      <FileName>PoC_TlcsMuon_i.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TimeCryptor.PoC_TlcsMuon_ni">
+    <Position X="22" Y="8.5" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAgAAAAAQAAAAAAAAAAAAAAEAAAAigAAAAAAAAAAAA=</HashCode>
+      <FileName>PoC_TlcsMuon_ni.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Enum Name="TimeCryptor.Classes.VerifyModeEnum">

@@ -19,6 +19,11 @@ namespace TimeCryptor
       // Test_TimelockZone.Run_Test_ValidationKeys(); 
 
       #region ALTRI TEST
+
+      //TLP35_BC.CreatePuzzle2019();
+      //TLP35_BC.CreatePuzzleLCS35();
+
+      //PoC_Tlock.Run_PoC();
       //Test_TimelockZone.Run_Test_SchnorrSignature();
 
       //Test_MCLlibrary.Run_Test_Pairing_BLS12_381();
