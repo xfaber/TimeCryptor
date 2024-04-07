@@ -92,21 +92,21 @@
     </TypeIdentifier>
   </Class>
   <Class Name="TimeCryptor.PoC_TLP">
-    <Position X="16.75" Y="8.5" Width="2" />
+    <Position X="18" Y="8.5" Width="2.75" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAEAAAAAAAAACAAAAAAACAAAEAAABAAAAA=</HashCode>
+      <HashCode>AAAAAAAAAAAEAAAAAAAAACAAAAAAACCAAAAAABAAAAA=</HashCode>
       <FileName>PoC_TLP.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="TimeCryptor.PoC_TlcsMuon_i">
-    <Position X="19.25" Y="8.5" Width="2.5" />
+    <Position X="21.25" Y="8.5" Width="2.5" />
     <TypeIdentifier>
       <HashCode>AAAgAAAAAQAAAAAAAAAAAAAAEAAAAigAAAAAAAAAAAA=</HashCode>
       <FileName>PoC_TlcsMuon_i.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="TimeCryptor.PoC_TlcsMuon_ni">
-    <Position X="22" Y="8.5" Width="2.5" />
+    <Position X="24.25" Y="8.5" Width="2.5" />
     <TypeIdentifier>
       <HashCode>AAAgAAAAAQAAAAAAAAAAAAAAEAAAAigAAAAAAAAAAAA=</HashCode>
       <FileName>PoC_TlcsMuon_ni.cs</FileName>
